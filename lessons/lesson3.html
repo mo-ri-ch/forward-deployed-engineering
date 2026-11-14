@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reading someone else's code</title>
+<meta name="description" content="Lesson 3 of Forward Deployed Engineering: find your way around a client's codebase, and fix a bug without breaking anything.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 3 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Reading someone else's code</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="Map it before you touch it">
+      <h2>Map it before you touch it</h2>
+      <p class="say">Northstar already has some code. Kevin, the IT lead, wrote a small program that saves every WhatsApp enquiry as a row in the lead tracker.</p>
+      <p class="say">All of a project's code together is its <mark>codebase</mark>. Before you change someone's codebase, learn its shape: what each file is for, and where things start.</p>
+      <p class="say">The README file usually says what the project does. Start there, then look at the file names.</p>
+
+      <div class="activity">
+        <div class="do">Find the file where a new WhatsApp message arrives first</div>
+        <ul class="files" id="files">
+          <li><button type="button" data-why="README.md says what the project does: &quot;Saves WhatsApp enquiries to the lead sheet.&quot; A good first read, but no code runs here.">README.md</button></li>
+          <li><button type="button" data-why="app.py starts the web server and connects the pieces. Messages pass through it, but it hands them straight on.">app.py</button></li>
+          <li><button type="button" data-right="Yes. WhatsApp sends each new message to a web address, and webhook.py is the code at that address. Everything starts here.">webhook.py</button></li>
+          <li><button type="button" data-why="leads.py cleans the data and decides if a lead is new. It runs after the message has arrived.">leads.py</button></li>
+          <li><button type="button" data-why="sheets.py writes rows to the Google Sheet. It's the last step, not the first.">sheets.py</button></li>
+          <li><button type="button" data-why="config.py holds settings, like which sheet to use. No messages pass through it.">config.py</button></li>
+          <li class="in"><button type="button" data-why="tests/test_leads.py checks that leads.py works. It never sees a real message.">tests/test_leads.py</button></li>
+        </ul>
+        <div class="say-why" id="filesWhy">Tap a file.</div>
+      </div>
+      <p class="hook">Now follow one message all the way through.</p>
+    </section>
+
+    <section class="part" data-title="Follow one message">
+      <h2>Follow one message</h2>
+      <p class="say">The fastest way to understand a codebase is to follow one real thing through it, from the moment it arrives to the moment it's saved.</p>
+      <p class="say">Here is the path of one enquiry. Each step is a function, a named piece of code that does one job.</p>
+
+      <div class="activity">
+        <div class="do">Step through one enquiry</div>
+        <ol class="day" id="path">
+          <li><span class="t">webhook</span><span><code>receive(request)</code>: WhatsApp sends the message here.</span></li>
+          <li><span class="t">webhook</span><span><code>parse(request)</code>: pulls out the phone number, name and text.</span></li>
+          <li><span class="t">leads</span><span><code>save_lead(msg)</code>: gets the lead ready to save.</span></li>
+          <li><span class="t">leads</span><span><code>normalize_phone(msg.phone)</code>: tidies the phone number.</span></li>
+          <li><span class="t">leads</span><span><code>find_lead(phone)</code>: is this phone number already in the sheet?</span></li>
+          <li><span class="t">sheets</span><span><code>append_row(…)</code>: if not, adds a new row.</span></li>
+        </ol>
+      </div>
+      <p class="hook">So where do the duplicate leads come from?</p>
+    </section>
+
+    <section class="part" data-title="Reproduce the bug first">
+      <h2>Reproduce the bug first</h2>
+      <p class="say">In discovery you found the same person saved as two or three leads. The path shows why that matters: a lead counts as new when its tidied phone number isn't found.</p>
+      <p class="say">Before fixing anything, make the problem happen on purpose. Then you know what "fixed" looks like.</p>
+      <p class="say">Run Kevin's function on real numbers from the sheet. Each should come out as the same 10 digits.</p>
+
+      <div class="activity">
+        <div class="do">Run normalize_phone on each number</div>
+        <div class="code"><span class="ln">def normalize_phone(raw):</span><span class="ln">    phone = raw.replace(" ", "")   <span class="c"># remove spaces</span></span><span class="ln">    if phone.startswith("+91"):</span><span class="ln">        phone = phone[3:]           <span class="c"># drop the first 3 characters</span></span><span class="ln">    return phone</span></div>
+        <div class="tablewrap"><table class="mini" id="runs"></table></div>
+        <div class="say-why" id="runsSay"></div>
+      </div>
+      <p class="hook">Can you predict what it does?</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 3.1">
+      <h2>✏️ Practice 3.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <code>replace(" ", "")</code> removes spaces only. Dashes and a leading 0 stay.<br>
+        <code>startswith("+91")</code> then <code>phone[3:]</code> drops the first 3 characters, but only if they are exactly +91.
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="9999901299" data-hint="Remove the spaces first, then check whether it starts with +91." data-work="Remove spaces: +919999901299.<br>It starts with +91, so drop 3 characters: 9999901299.">
+          <div class="ask">1. What does <code>normalize_phone("+91 99999 01299")</code> return?</div>
+        </div>
+        <div class="prob" data-answer="09999901300" data-hint="Remove the spaces. Does it start with +91?" data-work="Remove spaces: 09999901300.<br>It doesn't start with +91, so it stays: 09999901300. The leading 0 is kept.">
+          <div class="ask">2. What does <code>normalize_phone("0 99999 01300")</code> return?</div>
+        </div>
+        <div class="prob" data-answer="-99999-01301" data-hint="There are no spaces to remove. It starts with +91, so drop exactly 3 characters." data-work="No spaces, so nothing changes: +91-99999-01301.<br>It starts with +91, so drop 3 characters: -99999-01301. The dashes stay.">
+          <div class="ask">3. What does <code>normalize_phone("+91-99999-01301")</code> return?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="The smallest safe fix">
+      <h2>The smallest safe fix</h2>
+      <p class="say">It's not your codebase. Kevin will look after it long after you've gone, so change as little as you can.</p>
+      <p class="say">The bug lives in one function. The safest fix changes that function and nothing else.</p>
+
+      <div class="activity">
+        <div class="do">Which fix would you make?</div>
+        <div class="people" id="fixes">
+          <button class="person" type="button" data-why="That's weeks of work, new bugs, and code Kevin doesn't know. The bug is in five lines."><b>Rewrite the lead system in a newer framework</b></button>
+          <button class="person" type="button" data-right="Yes. One function changes, so the risk is small, and Kevin can read the whole change in a minute."><b>Make normalize_phone keep only the digits, then take the last 10</b></button>
+          <button class="person" type="button" data-why="That treats the symptom. New duplicates keep arriving, and someone does boring work every week."><b>Clean up the sheet by hand every Friday</b></button>
+        </div>
+        <div class="say-why" id="fixesWhy">Tap a fix.</div>
+      </div>
+      <p class="hook">How do you know it didn't break anything?</p>
+    </section>
+
+    <section class="part" data-title="Prove it works">
+      <h2>Prove it works</h2>
+      <p class="say">A small piece of code that checks other code gives the right answer is a <mark>test</mark>. Write one for every number that failed, and keep the ones that already passed.</p>
+      <p class="say">Run all the tests before and after your change. The new ones should go from failing to passing, and the old ones should still pass.</p>
+
+      <div class="activity">
+        <div class="do">Run the tests before and after the fix</div>
+        <div class="code" id="fixCode"></div>
+        <div class="btnrow"><button type="button" id="before" class="primary">Before the fix</button><button type="button" id="after">After the fix</button></div>
+        <div class="tablewrap"><table class="mini" id="tests"></table></div>
+        <div class="say-why" id="testsSay"></div>
+      </div>
+      <p class="hook">Now tell Kevin what you changed.</p>
+    </section>
+
+    <section class="part" data-title="Explain the change">
+      <h2>Explain the change</h2>
+      <p class="say">You don't just change someone's code. You send a <mark>pull request</mark>: your change plus a short note, which the owner reads and accepts.</p>
+      <p class="say">A good note says what changed, why, and what could go wrong. Kevin should be able to say yes without asking you anything.</p>
+
+      <div class="activity">
+        <div class="do">Write the pull request note</div>
+        <div id="pr"></div>
+        <div class="btnrow"><button class="primary" type="button" id="prCheck">Check my note</button></div>
+        <p class="say-why" id="prSay"></p>
+      </div>
+      <p class="hook">One more skill: reading errors.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 3.2">
+      <h2>✏️ Practice 3.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        When code crashes, Python prints a <b>traceback</b>. Read it from the bottom: the last line says <b>what</b> went wrong, the line above it says <b>where</b>.
+      </div>
+      <div class="activity" id="prac2">
+        <div class="code"><span class="ln">Traceback (most recent call last):</span><span class="ln">  File "webhook.py", line 18, in receive</span><span class="ln">    save_lead(msg)</span><span class="ln">  File "leads.py", line 31, in save_lead</span><span class="ln">    phone = normalize_phone(msg["phone"])</span><span class="ln">KeyError: 'phone'</span></div>
+        <div class="prob" data-answer="leads.py|leads" data-hint="Look at the last File line, just above the error." data-work="The last File line is leads.py, line 31. That's where it crashed.">
+          <div class="ask">1. In which file did the crash happen?</div>
+        </div>
+        <div class="prob" data-answer="31" data-hint="It's on the same File line as the answer above." data-work="File &quot;leads.py&quot;, line 31.">
+          <div class="ask">2. On which line?</div>
+        </div>
+        <div class="prob" data-answer="phone|'phone'" data-hint="A KeyError means a dictionary didn't have the key asked for." data-work="KeyError: 'phone'. The message had no phone key, maybe because it came from a different kind of WhatsApp event.">
+          <div class="ask">3. Which key was missing from the message?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all on new examples.</p>
+      <div class="test" data-test="3">
+        <div class="quiz" data-page="lesson3.html#1" data-topic="map it before you touch it" data-right="Yes. The README says what it does, and file names show its shape, before you read any code in detail.">
+          <div class="q"><small>Question 1</small>You're handed a codebase you've never seen. What do you read first?</div>
+          <div class="options">
+            <button data-why="Tests are useful later. First you need the big picture.">The longest test file</button>
+            <button data-right>The README, then the file names</button>
+            <button data-why="Starting at a random file is slow. You don't know yet how it fits.">Whichever file has the most code</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson3.html#2" data-topic="follow one message" data-right="Yes. Following one order from arrival to saving shows you which code touches it.">
+          <div class="q"><small>Question 2</small>An online shop's orders sometimes get the wrong price. How do you find the code to look at?</div>
+          <div class="options">
+            <button data-right>Follow one order through the code, from arrival to saving</button>
+            <button data-why="Searching for &quot;price&quot; finds dozens of places, most unrelated.">Search every file for the word "price"</button>
+            <button data-why="Rewriting before you understand the bug often adds new ones.">Rewrite the order code</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson3.html#3" data-topic="reproduce the bug first" data-right="Yes. Making it fail on purpose shows you the bug, and later proves the fix works.">
+          <div class="q"><small>Question 3</small>A client says "some emails don't get sent". What do you do before changing any code?</div>
+          <div class="options">
+            <button data-why="Without seeing it fail, you can't tell if your change fixed anything.">Add more logging everywhere and wait a week</button>
+            <button data-right>Find one email that wasn't sent, and make it fail again on purpose</button>
+            <button data-why="Guessing at fixes changes code with no proof it helps.">Try a few likely fixes and see if complaints stop</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson3.html#5" data-topic="the smallest safe fix" data-right="Yes. Removing the comma in one place changes the least code, and the owner can check it quickly.">
+          <div class="q"><small>Question 4</small>A report crashes because one function reads "1,500" as text, not a number. Which fix is safest?</div>
+          <div class="options">
+            <button data-right>Make that function remove commas before turning text into a number</button>
+            <button data-why="Too big and too risky for a one-function bug.">Move the whole report to a new database</button>
+            <button data-why="That hides the crash, but the totals would be wrong.">Skip any row that causes a crash</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson3.html#6" data-topic="prove it works" data-right="Yes. The old tests prove you didn't break anything, and the new ones prove the fix.">
+          <div class="q"><small>Question 5</small>After your fix, the new tests pass but one old test now fails. What does that tell you?</div>
+          <div class="options">
+            <button data-why="Deleting a failing test hides a real problem.">The old test is out of date: delete it</button>
+            <button data-right>Your change broke something that used to work</button>
+            <button data-why="A failing test is a real signal, not something to ignore.">Nothing: the new tests matter more</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">How do you get a language model to do the job reliably?</div>
+        <div><a href="lesson4.html">Lesson 4 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="3">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+picker("files", "filesWhy");
+stepper("path", { after: (i, n) => i === n - 1 ? "Duplicates are decided in leads.py, by the tidied phone number. That's where to look." : "" });
+
+(function () {
+  const table = document.getElementById("runs"), say = document.getElementById("runsSay");
+  const old = raw => { let p = raw.replace(/ /g, ""); if (p.startsWith("+91")) p = p.slice(3); return p; };
+  const inputs = ["+91 99999 01234", "9999901234", "099999 01236", "+91-99999-01234", "99999-01241"];
+  const want = ["9999901234", "9999901234", "9999901236", "9999901234", "9999901241"];
+  let ran;
+  function draw() {
+    table.innerHTML = `<tr><th>From the sheet</th><th>Should be</th><th>Comes out as</th><th></th></tr>` +
+      inputs.map((x, i) => `<tr><td>${x}</td><td>${want[i]}</td><td>${ran[i] ? `<b>${esc(old(x))}</b> ${old(x) === want[i] ? "✓" : "✗"}` : `<button type="button" data-i="${i}">Run</button>`}</td></tr>`).join("");
+    table.querySelectorAll("button").forEach(b => b.onclick = () => { ran[b.dataset.i] = true; draw(); });
+    const done = ran.filter(Boolean).length;
+    const bad = inputs.filter((x, i) => ran[i] && old(x) !== want[i]).length;
+    say.className = "say-why" + (done === inputs.length ? " good" : "");
+    say.textContent = done === inputs.length ? `${bad} of ${inputs.length} come out wrong: a leading 0 and dashes survive. That's the bug, reproduced.` : `${done} of ${inputs.length} run`;
+  }
+  function reset() { ran = inputs.map(() => false); draw(); }
+  reset(); addReset(table, reset);
+})();
+
+practice("prac1");
+picker("fixes", "fixesWhy");
+
+(function () {
+  const code = document.getElementById("fixCode"), table = document.getElementById("tests"), say = document.getElementById("testsSay");
+  const before = document.getElementById("before"), after = document.getElementById("after");
+  const oldF = raw => { let p = raw.replace(/ /g, ""); if (p.startsWith("+91")) p = p.slice(3); return p; };
+  const newF = raw => raw.replace(/\D/g, "").slice(-10);
+  const oldCode = ['def normalize_phone(raw):', '    phone = raw.replace(" ", "")', '    if phone.startswith("+91"):', '        phone = phone[3:]', '    return phone'];
+  const newCode = ['import re', '', 'def normalize_phone(raw):', '    digits = re.sub(r"\\D", "", raw)   <span class="c"># keep only 0-9</span>', '    return digits[-10:]               <span class="c"># the last 10 digits</span>'];
+  const cases = [["+91 99999 01234", "9999901234", "old"], ["9999901234", "9999901234", "old"], ["", "", "old"], ["099999 01236", "9999901236", "new"], ["+91-99999-01234", "9999901234", "new"], ["99999-01241", "9999901241", "new"]];
+  function show(isAfter) {
+    const f = isAfter ? newF : oldF;
+    code.innerHTML = (isAfter ? newCode : oldCode).map(l => `<span class="ln${isAfter && /digits/.test(l) ? " good" : ""}">${l}</span>`).join("");
+    let pass = 0;
+    table.innerHTML = `<tr><th>Test input</th><th>Expected</th><th>Result</th></tr>` + cases.map(([x, w, kind]) => {
+      const ok = f(x) === w; if (ok) pass++;
+      return `<tr><td>${x === "" ? "(empty)" : x}${kind === "new" ? " <small>new</small>" : ""}</td><td>${w === "" ? "(empty)" : w}</td><td>${ok ? "✓ pass" : "✗ fail"}</td></tr>`;
+    }).join("");
+    before.className = isAfter ? "" : "primary"; after.className = isAfter ? "primary" : "";
+    say.className = "say-why " + (isAfter ? "good" : "bad");
+    say.textContent = isAfter ? `${pass} of ${cases.length} pass. The three new tests now pass, and the three old ones still do.` : `${pass} of ${cases.length} pass. The three new tests fail, as expected: they describe the bug.`;
+  }
+  before.onclick = () => show(false); after.onclick = () => show(true);
+  show(false); addReset(table, () => show(false));
+})();
+
+lineBuilder("pr", "prCheck", "prSay", {
+  lines: [
+    { k: "Title", opts: ["Fix stuff", "Store phone numbers as 10 digits, so one person is one lead", "Refactor the leads module"], right: 1,
+      why: "The title should say what changes for the user, in plain words." },
+    { k: "Why", opts: ["The old code was bad", "Best practice", "The same person was saved as up to 3 leads, because phone formats differed"], right: 2,
+      why: "Give the real problem and its effect. Never blame the owner's code." },
+    { k: "What changed", opts: ["normalize_phone now keeps only digits and the last 10. Three new tests.", "Lots of files", "See the code"], right: 0,
+      why: "Say exactly what changed, so the reviewer knows where to look." },
+    { k: "Risk", opts: ["None", "Numbers from outside India would lose their country code. There are none in the data today.", "Everything could break"], right: 1,
+      why: "Every change has some risk. Name the real one, and how big it is." },
+  ],
+  done: "Kevin can say yes without asking you a single question. That's a good pull request.",
+});
+
+practice("prac2");
+</script>
+</body>
+</html>

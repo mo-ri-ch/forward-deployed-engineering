@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Building with LLMs</title>
+<meta name="description" content="Lesson 4 of Forward Deployed Engineering: prompts, answers in a fixed shape, and letting the model call tools.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 4 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Building with LLMs</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="What a model call is">
+      <h2>What a model call is</h2>
+      <p class="say">The admissions agent runs on a <mark>large language model</mark>, or LLM: a program trained on huge amounts of text that writes a likely reply to whatever you send it.</p>
+      <p class="say">Your code sends it some text and gets text back. That's one <mark>model call</mark>.</p>
+      <p class="say">The model reads and writes in small pieces of text called <mark>tokens</mark>, and you pay for every token in and out.</p>
+
+      <div class="activity">
+        <div class="do">Step through one model call</div>
+        <ol class="day" id="call">
+          <li><span class="t">1</span><span>A parent messages: "wat is fees for full stack?"</span></li>
+          <li><span class="t">2</span><span>Your code sends the model your rules plus that message.</span></li>
+          <li><span class="t">3</span><span>The model writes a reply, one token at a time.</span></li>
+          <li><span class="t">4</span><span>Your code checks the reply and sends it on WhatsApp.</span></li>
+        </ol>
+      </div>
+      <p class="hook">What rules does it need?</p>
+    </section>
+
+    <section class="part" data-title="Write the rules">
+      <h2>Write the rules</h2>
+      <p class="say">On its own, a model doesn't know Northstar's fees or rules. It fills the gaps with guesses that sound confident.</p>
+      <p class="say">So every call starts with instructions it must follow: who it is, the facts it may use, and what it must never do. These are called the <mark>system prompt</mark>.</p>
+
+      <div class="activity">
+        <div class="do">Switch rules on and see how the reply changes</div>
+        <div id="rules"></div>
+        <div class="reply" id="rulesOut"></div>
+      </div>
+      <p class="hook">But your code needs more than a friendly reply.</p>
+    </section>
+
+    <section class="part" data-title="Answers your code can use">
+      <h2>Answers your code can use</h2>
+      <p class="say">Your code has decisions to make: is this about fees, does it need a person? It can't read a paragraph reliably.</p>
+      <p class="say">So you also ask the model for a few fields in a fixed shape, in a format called <mark>JSON</mark>. The code reads the fields, and the friendly reply is just one of them.</p>
+
+      <div class="activity">
+        <div class="do">"My father passed away. We can't pay full fees. Any scholarship?" Which output is best?</div>
+        <div class="people" id="shapes">
+          <button class="person" type="button" data-why="It's in the right shape, but it misses that this family needs a kind person, not a bot."><code>{"intent": "fees", "needs_human": false}</code></button>
+          <button class="person" type="button" data-why="A person can read this, but code can't reliably pull a decision out of a paragraph."><span>"This person seems to want a scholarship and may be upset, so maybe a human should reply."</span></button>
+          <button class="person" type="button" data-right="Yes. The intent is right, and needs_human tells your code to hand this to a counsellor straight away."><code>{"intent": "scholarship", "needs_human": true}</code></button>
+        </div>
+        <div class="say-why" id="shapesWhy">Tap an output.</div>
+      </div>
+      <p class="hook">What does all this cost?</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 4.1">
+      <h2>✏️ Practice 4.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        In English, 1 token is about ¾ of a word, so <b class="eqbox">tokens ≈ words ÷ 0.75</b><br>
+        <b class="eqbox">cost = tokens ÷ 1,000,000 × price per million tokens</b>
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="800" data-hint="Divide the words by 0.75." data-work="600 ÷ 0.75 = 800 tokens.">
+          <div class="ask">1. Northstar's system prompt is 600 words. About how many tokens is that?</div>
+        </div>
+        <div class="prob" data-answer="3750000|3.75million" data-hint="Multiply tokens per enquiry by the number of enquiries." data-work="1,500 × 2,500 = 3,750,000 tokens a month.">
+          <div class="ask">2. Each enquiry uses 1,500 tokens in total. Northstar gets 2,500 enquiries a month. How many tokens is that a month?</div>
+        </div>
+        <div class="prob" data-answer="7.5|7.50|$7.5|$7.50" data-tol="0.01" data-hint="3,750,000 tokens is 3.75 million. Multiply by the price." data-work="3,750,000 ÷ 1,000,000 × $2 = 3.75 × $2 = $7.50 a month.">
+          <div class="ask">3. At an example price of $2 per million tokens, what does that cost a month, in dollars?</div>
+        </div>
+      </div>
+      <p class="muted-note">Prices change often, and differ between models. Always check the current price list before you quote a client.</p>
+    </section>
+
+    <section class="part" data-title="Let the model use tools">
+      <h2>Let the model use tools</h2>
+      <p class="say">The model can't see today's calendar. But your code can.</p>
+      <p class="say">So you tell the model which functions it may ask for, like <code>find_slots</code>. When it needs one, it replies with a request instead of an answer. Your code runs the function and sends the result back.</p>
+      <p class="say">A function the model can ask your code to run is called a <mark>tool</mark>.</p>
+
+      <div class="activity">
+        <div class="do">Step through one tool call</div>
+        <ol class="day" id="tool">
+          <li><span class="t">them</span><span>"Any counselling slot on Saturday morning?"</span></li>
+          <li><span class="t">model</span><span>Asks for a tool: <code>find_slots(day="Sat 21 Nov", part="morning")</code></span></li>
+          <li><span class="t">code</span><span>Checks the calendar: Anand 11:00, Divya 10:00 and 11:00, Meera 10:00.</span></li>
+          <li><span class="t">model</span><span>Gets those slots back, and writes: "Yes! Saturday at 10:00 or 11:00. Which suits you?"</span></li>
+        </ol>
+      </div>
+      <p class="hook">Which tool does each message need?</p>
+    </section>
+
+    <section class="part" data-title="Pick the right tool">
+      <h2>Pick the right tool</h2>
+      <p class="say">The admissions agent has three tools: <code>get_fee</code> reads the current fee sheet, <code>find_slots</code> reads the counselling calendar, and <code>hand_to_human</code> passes the chat to a counsellor.</p>
+      <p class="say">Choosing well is the model's job, but you must know the right answer, so you can test that it chooses well.</p>
+
+      <div class="activity">
+        <div class="do">Which tool should the agent use?</div>
+        <div id="toolsort"></div>
+      </div>
+      <p class="hook">Ask twice, and you may get two different answers.</p>
+    </section>
+
+    <section class="part" data-title="Same question, different answers">
+      <h2>Same question, different answers</h2>
+      <p class="say">A model picks each token with a little randomness. A setting called <mark>temperature</mark> controls how much.</p>
+      <p class="say">High temperature gives more varied, creative wording. Low temperature gives nearly the same answer every time.</p>
+      <p class="say">For fees and bookings, you want the same correct answer every time.</p>
+
+      <div class="activity">
+        <div class="do">Ask "fees for full stack?" three times</div>
+        <div class="slide"><span>Temperature</span><input type="range" id="temp" min="0" max="2" step="1" value="0" aria-label="Temperature"><span class="v" id="tempV">low</span></div>
+        <div id="tempOut"></div>
+        <div class="say-why" id="tempSay"></div>
+      </div>
+      <p class="hook">Now count the calls.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 4.2">
+      <h2>✏️ Practice 4.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        Each tool result goes back to the model, so a reply that uses <i>n</i> tools takes <b class="eqbox">n + 1 model calls</b>
+      </div>
+      <div class="activity" id="prac2">
+        <div class="prob" data-answer="3" data-hint="Two tools, so n = 2." data-work="2 tools + 1 = 3 model calls: one asks for get_fee, one asks for find_slots, one writes the reply.">
+          <div class="ask">1. "What's the fee for Python & AI, and is there a slot on Monday?" The agent uses get_fee, then find_slots. How many model calls is that?</div>
+        </div>
+        <div class="prob" data-answer="1500" data-hint="500 messages need 2 calls each, and 500 need 1 call each." data-work="500 × (1 + 1) + 500 × (0 + 1) = 1,000 + 500 = 1,500 model calls.">
+          <div class="ask">2. 1,000 messages a day. Half use one tool, half use none. How many model calls a day?</div>
+        </div>
+        <div class="prob" data-answer="150|₹150" data-hint="Multiply the model calls by the cost of each call." data-work="1,500 × ₹0.10 = ₹150 a day.">
+          <div class="ask">3. If each model call costs ₹0.10 (an example price), what do those calls cost a day, in rupees?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all on new examples.</p>
+      <div class="test" data-test="4">
+        <div class="quiz" data-page="lesson4.html#2" data-topic="write the rules" data-right="Yes. Without the facts in its rules, the model guesses, and the guesses sound confident.">
+          <div class="q"><small>Question 1</small>A clinic's bot tells patients the wrong opening hours. What's the most likely cause?</div>
+          <div class="options">
+            <button data-right>The opening hours aren't in its system prompt, so it guessed</button>
+            <button data-why="Temperature changes wording, but a missing fact is the bigger problem.">The temperature is too low</button>
+            <button data-why="Any model guesses when it isn't given the facts.">The model is too small</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson4.html#3" data-topic="answers your code can use" data-right="Yes. Fixed fields like these are something code can read and act on.">
+          <div class="q"><small>Question 2</small>Your code must decide whether to send a support email to the billing team. What should you ask the model for?</div>
+          <div class="options">
+            <button data-why="Code can't reliably read a decision out of a paragraph.">A paragraph explaining what the email is about</button>
+            <button data-right>JSON with a field like "team": "billing"</button>
+            <button data-why="A friendly reply is for the customer, not for your code.">A friendly reply to the customer</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson4.html#4" data-topic="tokens and cost" data-right="Yes. 2 million tokens × $3 per million = $6.">
+          <div class="q"><small>Question 3</small>A month of chats uses 2,000,000 tokens. At $3 per million tokens, what does it cost?</div>
+          <div class="options">
+            <button data-why="Divide by a million first: 2,000,000 tokens is 2 million.">$6,000,000</button>
+            <button data-right>$6</button>
+            <button data-why="That's the price for 1 million tokens. You used 2 million.">$3</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson4.html#5" data-topic="let the model use tools" data-right="Yes. The model can't see live stock, so it asks your code through a tool.">
+          <div class="q"><small>Question 4</small>A shop's bot needs to say whether a shoe is in stock right now. How should it find out?</div>
+          <div class="options">
+            <button data-why="The model doesn't know today's stock. It would guess.">The model knows from its training</button>
+            <button data-why="Stock changes every hour, so the prompt would always be out of date.">Put this month's stock list in the system prompt</button>
+            <button data-right>Give it a tool, like check_stock, that your code runs</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson4.html#7" data-topic="same question, different answers" data-right="Yes. Low temperature gives the same answer every time, which you want for facts like prices.">
+          <div class="q"><small>Question 5</small>Which temperature suits a bot that quotes insurance prices?</div>
+          <div class="options">
+            <button data-right>Low</button>
+            <button data-why="High temperature varies the wording, and can add made-up details.">High</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">How does it answer from the client's own documents?</div>
+        <div><a href="lesson5.html">Lesson 5 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="4">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+stepper("call");
+
+toggles("rules", "rulesOut", {
+  keys: [
+    { id: "role", label: "You are Northstar's admissions assistant." },
+    { id: "fees", label: "Only quote fees from this fee list: Full Stack ₹1,35,000…" },
+    { id: "jobs", label: "Never promise a job. Explain how placement support works." },
+    { id: "call", label: "Offer a free counselling call at the end." },
+  ],
+  render: s => {
+    const parts = [];
+    parts.push(s.role ? "Hi, I'm Northstar's admissions assistant." : "Hi!");
+    parts.push(s.fees ? "Full Stack Web Development is ₹1,35,000, with EMI from ₹11,300 a month." : `Full stack courses usually cost ₹50,000 to ₹2,00,000. <span class="warn">⚠ made-up fee</span>`);
+    parts.push(s.jobs ? "We don't promise jobs, but our placement team helps every student prepare and apply." : `Yes, with hard work a job is guaranteed! <span class="warn">⚠ job promise</span>`);
+    if (s.call) parts.push("Would you like a free counselling call?");
+    const all = s.role && s.fees && s.jobs && s.call;
+    return `<small>Reply to: "hi wat is fees for full stack? job guranteed?"</small>${parts.join(" ")}` + (all ? `<br><small>All four rules on: correct, safe and helpful.</small>` : "");
+  },
+});
+
+picker("shapes", "shapesWhy");
+practice("prac1");
+stepper("tool");
+
+sorter("toolsort", {
+  bins: [{ id: "fee", label: "get_fee" }, { id: "slot", label: "find_slots" }, { id: "human", label: "hand_to_human" }],
+  items: [
+    { t: "How much is the Python & AI course?", bin: "fee", why: "A fee question: read the current sheet." },
+    { t: "EMI possible for video editing?", bin: "fee", why: "EMI amounts come from the fee sheet too." },
+    { t: "Can I talk to someone tomorrow evening?", bin: "slot", why: "They want a call, so check the calendar." },
+    { t: "Saturday morning works for a call?", bin: "slot", why: "A time for a call: check the calendar." },
+    { t: "I joined last month and want a refund.", bin: "human", why: "Refunds need a person and the real policy." },
+    { t: "We can't afford fees since my father died.", bin: "human", why: "This needs a kind person, straight away." },
+  ],
+  done: "All sorted. Fees from the sheet, times from the calendar, and anything sensitive to a person.",
+});
+
+(function () {
+  const temp = document.getElementById("temp"), v = document.getElementById("tempV"), out = document.getElementById("tempOut"), say = document.getElementById("tempSay");
+  const replies = [
+    ["Full Stack is ₹1,35,000, with EMI available.", "Full Stack is ₹1,35,000, with EMI available.", "Full Stack is ₹1,35,000, with EMI available."],
+    ["Full Stack is ₹1,35,000, with EMI available.", "The Full Stack course costs ₹1,35,000, and you can pay in EMIs.", "It's ₹1,35,000 for Full Stack. EMI is possible!"],
+    ["Great question! Full Stack is around 1.3 lakh, give or take.", "Full Stack is ₹1,35,000 🎉 and honestly worth every rupee!", "Usually about ₹1,40,000, but ask about discounts!"],
+  ];
+  const notes = ["Same answer, three times. That's what you want for fees.", "Different words, same facts. Fine for chat, but harder to test.", "Wrong and vague fees crept in. Too risky for anything factual."];
+  function draw() {
+    const t = +temp.value; v.textContent = ["low", "medium", "high"][t];
+    out.innerHTML = replies[t].map((r, i) => `<div class="reply"><small>Try ${i + 1}</small>${esc(r)}</div>`).join("");
+    say.className = "say-why " + (t === 2 ? "bad" : "good"); say.textContent = notes[t];
+  }
+  temp.oninput = draw; draw();
+  addReset(out, () => { temp.value = 0; draw(); });
+})();
+
+practice("prac2");
+</script>
+</body>
+</html>

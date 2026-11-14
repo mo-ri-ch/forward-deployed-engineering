@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Answers from client documents</title>
+<meta name="description" content="Lesson 5 of Forward Deployed Engineering: turn fee sheets and course pages into answers you can trust.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 5 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Answers from client documents</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="Why not paste everything?">
+      <h2>Why not paste everything?</h2>
+      <p class="say">Northstar has fee sheets, course pages and policies: about 120 pages. You could paste all of it into every model call.</p>
+      <p class="say">But that's expensive, slow, and the model can miss the one line that matters.</p>
+      <p class="say">Instead, for each question, find the few pieces that answer it, and send only those. This is called <mark>retrieval-augmented generation</mark>, or RAG: retrieve first, then generate the reply.</p>
+
+      <div class="activity">
+        <div class="do">Compare the two ways for one question</div>
+        <div class="btnrow"><button type="button" id="all" class="primary">Paste everything</button><button type="button" id="rag">Find the relevant pieces</button></div>
+        <div class="facts" id="cmp" style="margin-top:12px"></div>
+        <div class="say-why" id="cmpSay"></div>
+      </div>
+      <p class="hook">First, the documents need cutting up.</p>
+    </section>
+
+    <section class="part" data-title="Cut documents into chunks">
+      <h2>Cut documents into chunks</h2>
+      <p class="say">You can only send pieces if the documents are cut into pieces. Each piece is a <mark>chunk</mark>.</p>
+      <p class="say">Too big, and each chunk carries lots of text that doesn't matter. Too small, and a chunk loses what it's about.</p>
+      <p class="say">Neighbouring chunks often share a few words, called <mark>overlap</mark>, so an idea split at a boundary isn't lost.</p>
+
+      <div class="activity">
+        <div class="do">Change the chunk size for this course page</div>
+        <div class="slide"><span>Sentences per chunk</span><input type="range" id="csize" min="1" max="4" value="2" aria-label="Sentences per chunk"><span class="v" id="csizeV">2</span></div>
+        <div id="chunks"></div>
+        <div class="say-why" id="chunkSay"></div>
+      </div>
+      <p class="hook">How do you find the right chunk for a question?</p>
+    </section>
+
+    <section class="part" data-title="Meaning as numbers">
+      <h2>Meaning as numbers</h2>
+      <p class="say">Searching for exact words fails: a parent types "mern course fees", and the page says "Full Stack Web Development".</p>
+      <p class="say">So a model turns every chunk into a list of numbers that captures its meaning, called an <mark>embedding</mark>. Texts that mean similar things get similar numbers, so they sit close together.</p>
+      <p class="say">Real embeddings have hundreds of numbers. Here, just two, so you can see them on a map.</p>
+
+      <div class="activity">
+        <div class="do">Tap a question to find its nearest chunks</div>
+        <div class="chips" id="qs"></div>
+        <div class="plane" id="plane"></div>
+        <div class="say-why" id="planeSay">Tap a question.</div>
+      </div>
+      <p class="hook">"Close" needs a number.</p>
+    </section>
+
+    <section class="part" data-title="Score the matches">
+      <h2>Score the matches</h2>
+      <p class="say">To measure how close two embeddings are, multiply their numbers pair by pair and add them up:</p>
+      <p class="say"><b class="eqbox">score = a₁ × b₁ + a₂ × b₂</b></p>
+      <p class="say">For embeddings of length 1, as most are, this is called <span data-peek="It measures the angle between the two lists: 1 means they point the same way, 0 means unrelated.">cosine similarity</span>. Higher means closer. You give the model the top few chunks.</p>
+
+      <div class="activity">
+        <div class="do">Question: "can i pay monthly?" = (0.6, 0.8). Score each chunk.</div>
+        <div class="tablewrap"><table class="mini" id="scores"></table></div>
+        <div class="say-why" id="scoresSay"></div>
+      </div>
+      <p class="hook">Your turn to score.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 5.1">
+      <h2>✏️ Practice 5.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <b class="eqbox">score = a₁ × b₁ + a₂ × b₂</b><br>
+        Higher score = closer meaning.
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="0.96" data-tol="0.005" data-hint="Multiply 0.6 × 0.8, then 0.8 × 0.6, and add." data-work="0.6 × 0.8 + 0.8 × 0.6 = 0.48 + 0.48 = 0.96.">
+          <div class="ask">1. Question (0.6, 0.8). Chunk A is (0.8, 0.6). What's the score?</div>
+        </div>
+        <div class="prob" data-answer="0.6" data-tol="0.005" data-hint="Multiply 0.6 × 1, then 0.8 × 0, and add." data-work="0.6 × 1 + 0.8 × 0 = 0.6.">
+          <div class="ask">2. Chunk B is (1, 0). What's its score for the same question?</div>
+        </div>
+        <div class="prob" data-answer="a|chunka" data-hint="Compare the two scores. Higher is closer." data-work="A scores 0.96, B scores 0.6. A is closer, so it goes to the model first.">
+          <div class="ask">3. Which chunk should go to the model first, A or B?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Answer only from what was found">
+      <h2>Answer only from what was found</h2>
+      <p class="say">Finding the right chunks isn't enough. The model must answer only from them, and say so when they don't contain the answer.</p>
+      <p class="say">So the rules say: use only these pieces, and if the answer isn't there, say you don't know and offer a counsellor. Answering only from given sources is called <mark>grounding</mark>.</p>
+
+      <div class="activity">
+        <div class="do">"is hostel available near city centre campus? for girls". No chunk mentions hostels. Which reply?</div>
+        <div class="people" id="ground">
+          <button class="person" type="button" data-why="Made up. If it's wrong, a family plans around a hostel that doesn't exist."><span>"Yes, we have a girls' hostel near City Centre."</span></button>
+          <button class="person" type="button" data-why="Still made up, just vaguer. A number makes it sound true."><span>"Hostels near our campuses usually cost about ₹6,000 a month."</span></button>
+          <button class="person" type="button" data-right="Yes. It admits what it doesn't know, and moves the family to a person who does."><span>"I don't have hostel details. Can a counsellor message you about it today?"</span></button>
+        </div>
+        <div class="say-why" id="groundWhy">Tap a reply.</div>
+      </div>
+      <p class="hook">What if the documents themselves are wrong?</p>
+    </section>
+
+    <section class="part" data-title="Bad documents, bad answers">
+      <h2>Bad documents, bad answers</h2>
+      <p class="say">Remember the two fee sheets? Both get cut into chunks, and both match "fees for full stack". The model gets ₹1,35,000 and ₹1,45,000.</p>
+      <p class="say">No prompt fixes that. Fix it at the source: decide which document is the truth, and keep labels on each chunk, like its date and owner. Labels like these are called <mark>metadata</mark>.</p>
+
+      <div class="activity">
+        <div class="do">How would you fix it?</div>
+        <div class="people" id="source">
+          <button class="person" type="button" data-why="Then it quotes the old fee to half the parents. The model can't know which sheet is current."><b>Tell the model to pick the higher fee</b></button>
+          <button class="person" type="button" data-why="₹1,40,000 is a fee that doesn't exist at all."><b>Average the two fees</b></button>
+          <button class="person" type="button" data-right="Yes. One source of truth, labelled with its date, and the client agrees to retire the old sheet."><b>Search only the current sheet, labelled with its date, and ask Arjun to retire the old one</b></button>
+        </div>
+        <div class="say-why" id="sourceWhy">Tap a fix.</div>
+      </div>
+      <p class="hook">Time to count some chunks.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 5.2">
+      <h2>✏️ Practice 5.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        With chunk size <i>c</i> words and overlap <i>o</i>, each new chunk starts <i>c − o</i> words after the last one:<br>
+        <b class="eqbox">chunks = (words − o) ÷ (c − o), rounded up</b>
+      </div>
+      <div class="activity" id="prac2">
+        <div class="prob" data-answer="4" data-hint="With no overlap, o = 0." data-work="(1,200 − 0) ÷ (300 − 0) = 4 chunks.">
+          <div class="ask">1. A 1,200-word policy, chunks of 300 words, no overlap. How many chunks?</div>
+        </div>
+        <div class="prob" data-answer="5" data-hint="Work out (1,200 − 50) ÷ (300 − 50), then round up." data-work="(1,200 − 50) ÷ (300 − 50) = 1,150 ÷ 250 = 4.6, rounded up to 5 chunks.">
+          <div class="ask">2. The same policy, chunks of 300 words with 50 words of overlap. How many chunks?</div>
+        </div>
+        <div class="prob" data-answer="120" data-hint="Find the total words first: 120 pages × 400 words." data-work="120 × 400 = 48,000 words.<br>48,000 ÷ 400 = 120 chunks.">
+          <div class="ask">3. Northstar's 120 pages have about 400 words each. With 400-word chunks and no overlap, how many chunks?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all on new examples.</p>
+      <div class="test" data-test="5">
+        <div class="quiz" data-page="lesson5.html#1" data-topic="why not paste everything?" data-right="Yes. Sending only the relevant pieces is cheaper, faster and easier for the model to use.">
+          <div class="q"><small>Question 1</small>A law firm has 5,000 pages of contracts. Why not paste them all into each question?</div>
+          <div class="options">
+            <button data-why="Models can read contracts. The problem is how much you send each time.">Models can't read legal text</button>
+            <button data-right>It's costly and slow, and the model can miss the key line</button>
+            <button data-why="The problem isn't the format. It's sending far too much each time.">Contracts must be turned into tables first</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson5.html#3" data-topic="meaning as numbers" data-right="Yes. Embeddings match meaning, so different words for the same thing still sit close together.">
+          <div class="q"><small>Question 2</small>A customer asks about "getting my money back", and the policy says "refunds". Which search finds it?</div>
+          <div class="options">
+            <button data-why="The words don't match, so a word search misses it.">Searching for the exact words</button>
+            <button data-right>Comparing embeddings</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson5.html#4" data-topic="score the matches" data-right="Yes. 1 × 0.5 + 0 × 0.9 = 0.5.">
+          <div class="q"><small>Question 3</small>Question (1, 0), chunk (0.5, 0.9). What's the score?</div>
+          <div class="options">
+            <button data-right>0.5</button>
+            <button data-why="That adds the chunk's numbers. Multiply pair by pair first.">1.4</button>
+            <button data-why="Check the second pair: 0 × 0.9 = 0.">0.9</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson5.html#6" data-topic="answer only from what was found" data-right="Yes. Grounded answers say when the sources don't cover something.">
+          <div class="q"><small>Question 4</small>A bank's bot is asked about a loan type that isn't in any retrieved chunk. What should it do?</div>
+          <div class="options">
+            <button data-why="A guess about a loan is risky and can be wrong.">Answer from general knowledge about loans</button>
+            <button data-right>Say it doesn't have that information, and offer a person</button>
+            <button data-why="Quoting an unrelated chunk confuses the customer.">Quote the closest chunk anyway</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson5.html#7" data-topic="bad documents, bad answers" data-right="Yes. Fix the source: one current version, labelled, and the old one retired.">
+          <div class="q"><small>Question 5</small>A company's search holds two versions of its leave policy, and the bot quotes both. What's the real fix?</div>
+          <div class="options">
+            <button data-why="The model can't tell which version is current.">Tell the model to choose the more generous one</button>
+            <button data-right>Keep only the current version, labelled with its date</button>
+            <button data-why="Bigger chunks still contain both versions.">Make the chunks bigger</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">How does it take actions, not just answer?</div>
+        <div><a href="lesson6.html">Lesson 6 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="5">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+(function () {
+  const all = document.getElementById("all"), rag = document.getElementById("rag"), cmp = document.getElementById("cmp"), say = document.getElementById("cmpSay");
+  const ways = {
+    all: { t: 90000, notes: "Every page, every time. Slow, costly, and the fee line is one among thousands." },
+    rag: { t: 1500, notes: "Three relevant chunks plus the question. About 60 times fewer tokens." },
+  };
+  function show(k) {
+    const w = ways[k];
+    cmp.innerHTML = `<div class="fact"><div class="big">${w.t.toLocaleString("en-IN")}</div><div class="what">tokens sent per question</div></div>
+      <div class="fact"><div class="big">${(w.t * 2500 / 1e6).toLocaleString("en-IN")}M</div><div class="what">tokens a month, at 2,500 questions</div></div>`;
+    say.className = "say-why " + (k === "rag" ? "good" : "bad"); say.textContent = w.notes;
+    all.className = k === "all" ? "primary" : ""; rag.className = k === "rag" ? "primary" : "";
+  }
+  all.onclick = () => show("all"); rag.onclick = () => show("rag");
+  show("all"); addReset(cmp, () => show("all"));
+})();
+
+(function () {
+  const size = document.getElementById("csize"), v = document.getElementById("csizeV"), box = document.getElementById("chunks"), say = document.getElementById("chunkSay");
+  const s = ["Full Stack Web Development (MERN) runs for 9 months.", "You build websites with MongoDB, Express, React and Node.", "Classes run on campus or hybrid.", "Mentors answer doubts every evening.", "The last 2 months are a paid or unpaid internship.", "The fee is ₹1,35,000, with EMI available.", "Weekly reviews are run by working engineers.", "The placement team helps you apply for jobs."];
+  const notes = { 1: "Tiny chunks: \"The last 2 months are an internship\" doesn't say which course. A question about Full Stack might miss it.", 2: "A good balance here: each chunk is about one thing.", 3: "Bigger chunks mix topics, so more unrelated text goes to the model.", 4: "Two huge chunks: whatever the question, half the page comes along." };
+  const fills = ["var(--note-yellow)", "var(--note-blue)", "var(--note-green)", "var(--note-pink)"];
+  function draw() {
+    const n = +size.value; v.textContent = n; const out = [];
+    for (let i = 0, k = 0; i < s.length; i += n, k++) out.push(`<div style="background:${fills[k % 4]};padding:6px 10px;border-radius:4px;margin:4px 0;color:var(--ink);font-size:0.92rem"><small style="color:var(--pencil)">chunk ${k + 1}</small> ${s.slice(i, i + n).join(" ")}</div>`);
+    box.innerHTML = out.join(""); say.className = "say-why" + (n === 2 ? " good" : ""); say.textContent = notes[n];
+  }
+  size.oninput = draw; draw(); addReset(box, () => { size.value = 2; draw(); });
+})();
+
+(function () {
+  const plane = document.getElementById("plane"), qs = document.getElementById("qs"), say = document.getElementById("planeSay");
+  const pts = [
+    ["Full Stack fee ₹1,35,000", 4, 22], ["Python & AI fee ₹1,65,000", 50, 8], ["EMI: pay monthly", 8, 54],
+    ["Campuses and timings", 96, 24], ["2-month internship", 50, 68], ["Placement support", 96, 82], ["Laptop for video course", 6, 90],
+  ];
+  const questions = [
+    { t: "mern course fees?", x: 20, y: 38, near: [0, 1], say: "Nearest: the fee chunks. \"mern\" never appears, but the meaning matches." },
+    { t: "can i pay monthly?", x: 16, y: 72, near: [2, 0], say: "Nearest: the EMI chunk, then the Full Stack fee." },
+    { t: "hostel for girls?", x: 96, y: 10, near: [], say: "Nothing is close. The nearest chunk is about campuses, which doesn't answer it. Close enough matters, not just nearest." },
+  ];
+  let active = null;
+  function draw() {
+    const pos = (x, y) => `left:${x}%;top:${y}%;transform:translate(${x < 35 ? "0" : x > 65 ? "-100%" : "-50%"},-50%)`;
+    plane.innerHTML = pts.map(([t, x, y], i) => `<span class="pt${active ? (active.near.includes(i) ? " near" : " dim") : ""}" style="${pos(x, y)}">${t}</span>`).join("") +
+      (active ? `<span class="pt q" style="${pos(active.x, active.y)}">${active.t}</span>` : "");
+    say.textContent = active ? active.say : "Tap a question.";
+    qs.querySelectorAll(".chip").forEach((c, i) => c.classList.toggle("on", active === questions[i]));
+  }
+  questions.forEach(q => { const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = q.t; b.onclick = () => { active = q; draw(); }; qs.appendChild(b); });
+  draw(); addReset(plane, () => { active = null; draw(); });
+})();
+
+(function () {
+  const table = document.getElementById("scores"), say = document.getElementById("scoresSay");
+  const q = [0.6, 0.8];
+  const rows = [["EMI: pay monthly", 0.5, 0.87], ["Full Stack fee ₹1,35,000", 0.8, 0.6], ["2-month internship", 1, 0], ["Campuses and timings", 0, 1]];
+  let shown;
+  function draw() {
+    table.innerHTML = `<tr><th>Chunk</th><th>Embedding</th><th>Score</th></tr>` + rows.map(([t, a, b], i) => {
+      const sc = (q[0] * a + q[1] * b);
+      return `<tr><td>${t}</td><td>(${a}, ${b})</td><td>${shown[i] ? `0.6 × ${a} + 0.8 × ${b} = <b>${sc.toFixed(2)}</b>` : `<button type="button" data-i="${i}">Score</button>`}</td></tr>`;
+    }).join("");
+    table.querySelectorAll("button").forEach(b => b.onclick = () => { shown[b.dataset.i] = true; draw(); });
+    const n = shown.filter(Boolean).length;
+    say.className = "say-why" + (n === rows.length ? " good" : "");
+    say.textContent = n === rows.length ? "Top match: EMI (1.00). Next: the Full Stack fee (0.96). Those two go to the model." : `${n} of ${rows.length} scored`;
+  }
+  function reset() { shown = rows.map(() => false); draw(); }
+  reset(); addReset(table, reset);
+})();
+
+practice("prac1");
+picker("ground", "groundWhy");
+picker("source", "sourceWhy");
+practice("prac2");
+</script>
+</body>
+</html>

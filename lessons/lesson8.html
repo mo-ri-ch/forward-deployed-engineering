@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipping it</title>
+<meta name="description" content="Lesson 8 of Forward Deployed Engineering: deploy it, keep costs down and keep student data safe.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 8 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Shipping it</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="Where it runs">
+      <h2>Where it runs</h2>
+      <p class="say">The agent works on your laptop. Now it has to run all day, every day, for real parents.</p>
+      <p class="say">Putting it somewhere real users can reach is called <mark>deploying</mark> it. Before you do, know every piece a message passes through, because each one can fail.</p>
+
+      <div class="activity">
+        <div class="do">Follow one message through the live system</div>
+        <ol class="day" id="flow">
+          <li><span class="t">WhatsApp</span><span>A parent sends a message. WhatsApp passes it to Northstar's web address.</span></li>
+          <li><span class="t">server</span><span>Your code, on a server that's always on, receives it and hides personal details.</span></li>
+          <li><span class="t">model</span><span>Your code calls the model, which may ask for tools: fees or slots.</span></li>
+          <li><span class="t">checks</span><span>The guardrails check the reply.</span></li>
+          <li><span class="t">WhatsApp</span><span>The reply goes back to the parent.</span></li>
+          <li><span class="t">sheet</span><span>The lead and the chat are saved to the lead tracker.</span></li>
+        </ol>
+      </div>
+      <p class="hook">Each piece needs a key. Where do keys go?</p>
+    </section>
+
+    <section class="part" data-title="Keep keys secret">
+      <h2>Keep keys secret</h2>
+      <p class="say">Your code proves who it is to WhatsApp and to the model company with secret codes called <mark>API keys</mark>. Anyone with the key can spend Northstar's money or read its messages.</p>
+      <p class="say">So keys never go in the code, in a chat or on GitHub. They're stored on the server, in settings the code reads when it starts, called <mark>environment variables</mark>.</p>
+
+      <div class="activity">
+        <div class="do">Sort each habit</div>
+        <div id="keys"></div>
+      </div>
+      <p class="hook">Keys aren't the only secret.</p>
+    </section>
+
+    <section class="part" data-title="Protect personal data">
+      <h2>Protect personal data</h2>
+      <p class="say">Enquiries carry phone numbers, emails and family stories. Kevin's first worry was exactly this.</p>
+      <p class="say">Send the model only what it needs to answer. A phone number never helps it answer a fee question, so replace it with a placeholder before the call. India's data protection law, the DPDP Act, also expects you to collect and share as little as you need.</p>
+
+      <div class="activity">
+        <div class="do">Switch on the protections and see what the model receives</div>
+        <div id="mask"></div>
+        <div class="reply" id="maskOut"></div>
+      </div>
+      <p class="hook">Practise hiding data.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 8.1">
+      <h2>✏️ Practice 8.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        To show a number to staff without revealing it, keep only the last 4 digits: 9999901239 → ******1239.<br>
+        <b class="eqbox">share = count ÷ total × 100%</b>
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="******1264|1264" data-hint="Replace all but the last 4 digits with *." data-work="9999901264 has 10 digits. Hide the first 6: ******1264.">
+          <div class="ask">1. How does 9999901264 look when masked this way?</div>
+        </div>
+        <div class="prob" data-answer="50" data-hint="How many of the 12 messages are left out?" data-work="12 − 6 = 6 messages left out.<br>6 ÷ 12 × 100% = 50%.">
+          <div class="ask">2. A chat has 12 messages. You send the model only the last 6, plus the state. What share of messages is not sent, in %?</div>
+        </div>
+        <div class="prob" data-answer="0" data-hint="Every phone number is replaced before any model call." data-work="Masking runs on every message before every call, so 0 phone numbers reach the model.">
+          <div class="ask">3. With phone numbers hidden on every message, how many of last month's 2,500 enquirers' numbers reached the model?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Keep the cost down">
+      <h2>Keep the cost down</h2>
+      <p class="say">Models come in sizes. Big ones handle hard questions well but cost much more per call. Most enquiries are easy: fees, campuses, timings.</p>
+      <p class="say">So send easy questions to a small, cheap model, and only hard ones to the big model. Sending each request to the right model is called <mark>routing</mark>.</p>
+
+      <div class="activity">
+        <div class="do">Change the numbers and watch the monthly bill</div>
+        <div class="slide"><span>Enquiries a month</span><input type="range" id="nEnq" min="1000" max="5000" step="500" value="2500" aria-label="Enquiries a month"><span class="v" id="nEnqV"></span></div>
+        <div class="slide"><span>Sent to small model</span><input type="range" id="pSmall" min="0" max="100" step="10" value="0" aria-label="Share sent to the small model"><span class="v" id="pSmallV"></span></div>
+        <div class="result" id="bill"></div>
+        <p class="muted-note">Example prices: ₹0.60 per call on the big model, ₹0.05 on the small one. 3 calls per enquiry.</p>
+      </div>
+      <p class="hook">Ready to switch it on? Not all at once.</p>
+    </section>
+
+    <section class="part" data-title="Roll out slowly">
+      <h2>Roll out slowly</h2>
+      <p class="say">Don't switch it on for everyone on day one. Start small, watch closely, then grow.</p>
+      <p class="say">And keep one switch that turns the agent off and sends every chat back to counsellors, in seconds. Going back to the old way like that is called a <mark>rollback</mark>.</p>
+
+      <div class="activity">
+        <div class="do">Step through Northstar's rollout</div>
+        <ol class="day" id="roll">
+          <li><span class="t">week 1</span><span>Counsellors chat with it themselves, trying to break it.</span></li>
+          <li><span class="t">week 2</span><span>Live at night only, 9 pm to 8 am. Counsellors read every chat next morning.</span></li>
+          <li><span class="t">week 3</span><span>All hours, for 1 in 4 chats. Compare first-reply times with the rest.</span></li>
+          <li><span class="t">week 4</span><span>Everyone, if the numbers hold. The off switch stays ready.</span></li>
+        </ol>
+      </div>
+      <p class="hook">Work out the bill yourself.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 8.2">
+      <h2>✏️ Practice 8.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <b class="eqbox">monthly cost = enquiries × calls per enquiry × cost per call</b>
+      </div>
+      <div class="activity" id="prac2">
+        <div class="prob" data-answer="4500|₹4500" data-hint="Multiply 2,500 × 3 × 0.60." data-work="2,500 × 3 × ₹0.60 = ₹4,500 a month.">
+          <div class="ask">1. 2,500 enquiries, 3 calls each, all on the big model at ₹0.60 a call. Monthly cost, in rupees?</div>
+        </div>
+        <div class="prob" data-answer="375|₹375" data-hint="Same, but ₹0.05 a call." data-work="2,500 × 3 × ₹0.05 = ₹375 a month.">
+          <div class="ask">2. The same, all on the small model at ₹0.05 a call?</div>
+        </div>
+        <div class="prob" data-answer="1200|₹1200" data-hint="Work out the average cost per call first: 0.8 × 0.05 + 0.2 × 0.60." data-work="Average cost per call: 0.8 × ₹0.05 + 0.2 × ₹0.60 = ₹0.04 + ₹0.12 = ₹0.16.<br>2,500 × 3 × ₹0.16 = ₹1,200 a month.">
+          <div class="ask">3. With 80% routed to the small model and 20% to the big one?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all on new examples.</p>
+      <div class="test" data-test="8">
+        <div class="quiz" data-page="lesson8.html#2" data-topic="keep keys secret" data-right="Yes. Replace the key at once, so the leaked one stops working.">
+          <div class="q"><small>Question 1</small>You notice an API key was pushed to a public GitHub repo an hour ago. What do you do first?</div>
+          <div class="options">
+            <button data-why="Deleting the file isn't enough: it stays in the history, and may already be copied.">Delete the file from the repo</button>
+            <button data-right>Cancel the key and make a new one</button>
+            <button data-why="An hour is plenty of time for a bot to find and use it.">Nothing, if nobody has used it yet</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson8.html#3" data-topic="protect personal data" data-right="Yes. The account number doesn't help answer the question, so it shouldn't leave your system.">
+          <div class="q"><small>Question 2</small>A bank's bot answers "what's your savings interest rate?". The message arrives with the customer's account number. Should it go to the model?</div>
+          <div class="options">
+            <button data-right>No: hide it, the model doesn't need it</button>
+            <button data-why="It's not needed for this answer, so sharing it only adds risk.">Yes: more context is better</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson8.html#5" data-topic="keep the cost down" data-right="Yes. Easy questions go to the cheap model; only hard ones pay for the big one.">
+          <div class="q"><small>Question 3</small>A travel bot's bill is too high, and most questions are simple, like "what time is check-in?". What helps most?</div>
+          <div class="options">
+            <button data-why="That's the most expensive choice for simple questions.">Use the biggest model for everything</button>
+            <button data-right>Send simple questions to a smaller model</button>
+            <button data-why="Shorter replies help a little, but the model choice matters far more.">Make the replies shorter</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson8.html#6" data-topic="roll out slowly" data-right="Yes. Start small, watch closely, and keep a way back.">
+          <div class="q"><small>Question 4</small>A hospital's new booking bot is ready. What's the safest launch?</div>
+          <div class="options">
+            <button data-why="If something's wrong, every patient meets it at once.">Switch it on for all patients on Monday</button>
+            <button data-right>A small group first, staff checking chats, with an off switch</button>
+            <button data-why="Never launching means patients never get the benefit.">Wait until it's perfect</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson8.html#7" data-topic="monthly cost" data-right="Yes. 1,000 × 2 × ₹0.50 = ₹1,000.">
+          <div class="q"><small>Question 5</small>1,000 chats a month, 2 calls each, ₹0.50 a call. What's the monthly cost?</div>
+          <div class="options">
+            <button data-why="Remember the 2 calls per chat.">₹500</button>
+            <button data-right>₹1,000</button>
+            <button data-why="Check: 1,000 × 2 × 0.50.">₹2,000</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">It's live. What happens on day two?</div>
+        <div><a href="lesson9.html">Lesson 9 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="8">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+stepper("flow", { after: (i, n) => i === n - 1 ? "Six pieces. Any of them can fail, so each needs a check." : "" });
+
+sorter("keys", {
+  bins: [{ id: "safe", label: "Safe" }, { id: "unsafe", label: "Unsafe" }],
+  items: [
+    { t: "Paste the API key into app.py", bin: "unsafe", why: "Anyone who sees the code gets the key." },
+    { t: "Send the key to Kevin on WhatsApp", bin: "unsafe", why: "Chats get forwarded and backed up." },
+    { t: "Push a settings file with keys to GitHub", bin: "unsafe", why: "Bots scan GitHub for keys within minutes." },
+    { t: "Store the key as an environment variable on the server", bin: "safe", why: "The code reads it there, and it never appears in the code." },
+    { t: "Give testing and live systems separate keys", bin: "safe", why: "A leak in testing can't touch live data." },
+    { t: "Replace a key you think has leaked", bin: "safe", why: "The old key stops working at once." },
+  ],
+  done: "Sorted. The rule: keys live on the server, never in code or chats.",
+});
+
+toggles("mask", "maskOut", {
+  keys: [
+    { id: "phone", label: "Hide phone numbers" },
+    { id: "email", label: "Hide email addresses" },
+  ],
+  render: s => {
+    let t = "hi I'm Karthik, 99999 01239, karthik.s@example.com. flutter course fees?";
+    if (s.phone) t = t.replace("99999 01239", "[PHONE]");
+    if (s.email) t = t.replace("karthik.s@example.com", "[EMAIL]");
+    const leaks = (!s.phone ? 1 : 0) + (!s.email ? 1 : 0);
+    return `<small>Sent to the model</small>${esc(t)}<br><small>${leaks ? `<span class="warn">${leaks} personal detail${leaks > 1 ? "s" : ""} leaving Northstar</span>` : "Nothing personal leaves Northstar, and the model can still answer the fee question."}</small>`;
+  },
+});
+
+practice("prac1");
+
+(function () {
+  const n = document.getElementById("nEnq"), p = document.getElementById("pSmall"), nv = document.getElementById("nEnqV"), pv = document.getElementById("pSmallV"), bill = document.getElementById("bill");
+  function draw() {
+    const e = +n.value, s = +p.value / 100;
+    const cost = e * 3 * (s * 0.05 + (1 - s) * 0.60);
+    nv.textContent = e.toLocaleString("en-IN"); pv.textContent = p.value + "%";
+    bill.innerHTML = `₹${Math.round(cost).toLocaleString("en-IN")} a month<small>${s >= 0.7 ? "Most easy questions go to the small model. Same answers, a fraction of the cost." : "Try sending more easy questions to the small model."}</small>`;
+  }
+  n.oninput = draw; p.oninput = draw; draw();
+  addReset(bill, () => { n.value = 2500; p.value = 0; draw(); });
+})();
+
+stepper("roll");
+practice("prac2");
+</script>
+</body>
+</html>

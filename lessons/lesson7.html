@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tests, guardrails and monitoring</title>
+<meta name="description" content="Lesson 7 of Forward Deployed Engineering: decide what good enough means, measure it, and stop risky answers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 7 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Tests, guardrails and monitoring</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="Agree what good enough means">
+      <h2>Agree what good enough means</h2>
+      <p class="say">No AI system is right every time. So before launch, agree with Priya what "good enough" means.</p>
+      <p class="say">Some things must be right every single time. Others can be right most of the time. Saying which is which is part of the scope.</p>
+
+      <div class="activity">
+        <div class="do">Sort each behaviour</div>
+        <div id="bar"></div>
+      </div>
+      <p class="hook">How do you check those before launch?</p>
+    </section>
+
+    <section class="part" data-title="Build tests from real chats">
+      <h2>Build tests from real chats</h2>
+      <p class="say">Collect real messages, and for each one write down what a good reply must do. Run the agent on all of them before every change.</p>
+      <p class="say">This fixed set of test cases is called an <mark>evaluation set</mark>, or eval set.</p>
+      <p class="say">A good one mixes common questions, tricky ones, and risky ones.</p>
+
+      <div class="activity">
+        <div class="do">Which 10 test cases would you start with?</div>
+        <div class="people" id="sets">
+          <button class="person" type="button" data-why="Easy to pass, so it tells you little. The mistakes that hurt are in the tricky and risky chats."><b>10 fee questions</b><span>The most common kind.</span></button>
+          <button class="person" type="button" data-right="Yes. Mostly real, common questions, plus the tricky and risky ones where mistakes hurt most."><b>5 common, 3 tricky, 2 risky</b><span>Fees and booking; a voice note, mixed language, a duplicate; a job promise and a grieving parent.</span></button>
+          <button class="person" type="button" data-why="Made-up questions miss how people really write: typos, mixed languages, five messages in a row."><b>10 questions you write yourself</b><span>Clean and clear.</span></button>
+        </div>
+        <div class="say-why" id="setsWhy">Tap a set.</div>
+      </div>
+      <p class="hook">Then each reply needs a grade.</p>
+    </section>
+
+    <section class="part" data-title="Grade the replies">
+      <h2>Grade the replies</h2>
+      <p class="say">"Looks fine" isn't a grade. Use the same short checklist for every reply: are the facts right, does it follow the rules, does it take the right action, is the tone right?</p>
+      <p class="say">With hundreds of tests, a second model can grade with the same checklist. That's called an <mark>LLM judge</mark>. You still check a sample of its grades by hand.</p>
+
+      <div class="activity">
+        <div class="do">Grade this reply</div>
+        <div class="bub them"><small>Enquirer</small>your ad says 100% placement. so if I don't get a job I get refund right?</div>
+        <div class="bub you" style="margin-top:6px"><small>Agent</small>Yes! If you don't get a job, we'll refund your fees. Want to book a call? 😊</div>
+        <div id="grade" style="margin-top:10px"></div>
+        <div class="btnrow"><button type="button" class="primary" id="gradeCheck">Check my grades</button></div>
+        <div class="say-why" id="gradeSay"></div>
+      </div>
+      <p class="hook">Now work out some pass rates.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 7.1">
+      <h2>✏️ Practice 7.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <b class="eqbox">pass rate = passed ÷ total × 100%</b>
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="92" data-hint="Divide 46 by 50, then multiply by 100." data-work="46 ÷ 50 × 100% = 92%.">
+          <div class="ask">1. The agent passes 46 of 50 tests. What's the pass rate, in %?</div>
+        </div>
+        <div class="prob" data-answer="57" data-hint="Find 95% of 60." data-work="95% × 60 = 0.95 × 60 = 57 tests.">
+          <div class="ask">2. The eval set grows to 60 tests, and the target is 95%. How many must pass?</div>
+        </div>
+        <div class="prob" data-answer="no" data-hint="Fees were one of the things that must be right every time." data-work="19 of 20 is 95%, but fees must be right 100% of the time. One wrong fee blocks launch.">
+          <div class="ask">3. 19 of 20 fee tests pass. Is that good enough to launch? (yes or no)</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Guardrails">
+      <h2>Guardrails</h2>
+      <p class="say">Tests run before launch. But every live reply needs checking too.</p>
+      <p class="say">Simple code runs on every reply before it's sent: does it mention a fee that isn't in the sheet? Does it promise a job? Does it share a phone number? If so, it's blocked and a person takes over.</p>
+      <p class="say">Checks like these are called <mark>guardrails</mark>. They're plain code, so they never have an off day.</p>
+
+      <div class="activity">
+        <div class="do">Which drafts should the guardrails block?</div>
+        <div id="guard"></div>
+      </div>
+      <p class="hook">After launch, how do you know it's still working?</p>
+    </section>
+
+    <section class="part" data-title="Watch it after launch">
+      <h2>Watch it after launch</h2>
+      <p class="say">Track a few numbers every day: how fast replies go out, how many chats are handed over, how many replies the guardrails block, and how many complaints come in. Watching these is called <mark>monitoring</mark>.</p>
+      <p class="say">When a number jumps, don't guess. Read the conversations behind it.</p>
+
+      <div class="activity">
+        <div class="do">This week, handovers jumped from 8% to 30% of chats. What do you do first?</div>
+        <div class="people" id="watch">
+          <button class="person" type="button" data-right="Yes. The number tells you something changed. The chats tell you what. Maybe a new course launched that the agent doesn't know about."><b>Read a sample of the chats that were handed over</b></button>
+          <button class="person" type="button" data-why="That hides the symptom, and may stop real problems reaching a person."><b>Change the rules so fewer chats are handed over</b></button>
+          <button class="person" type="button" data-why="Too drastic before you know the cause. Handovers are the safe failure: people still get answers."><b>Switch the agent off</b></button>
+        </div>
+        <div class="say-why" id="watchWhy">Tap an action.</div>
+      </div>
+      <p class="hook">Practise reading those numbers.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 7.2">
+      <h2>✏️ Practice 7.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <b class="eqbox">rate = count ÷ total × 100%</b>
+      </div>
+      <div class="activity" id="prac2">
+        <div class="prob" data-answer="8" data-hint="Divide the handovers by the chats." data-work="200 ÷ 2,500 × 100% = 8%.">
+          <div class="ask">1. Last month, 200 of 2,500 chats were handed over. What's the handover rate, in %?</div>
+        </div>
+        <div class="prob" data-answer="550" data-hint="Find 30% of 2,500, then subtract last month's 200." data-work="30% × 2,500 = 750 handovers.<br>750 − 200 = 550 more than last month.">
+          <div class="ask">2. This month it's 30% of 2,500 chats. How many more handovers is that than last month's 200?</div>
+        </div>
+        <div class="prob" data-answer="0.6" data-tol="0.01" data-hint="Divide 15 by 2,500, then multiply by 100." data-work="15 ÷ 2,500 × 100% = 0.6%.">
+          <div class="ask">3. The guardrails blocked 15 of 2,500 replies. What share is that, in %?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all on new examples.</p>
+      <div class="test" data-test="7">
+        <div class="quiz" data-page="lesson7.html#1" data-topic="agree what good enough means" data-right="Yes. A wrong dose can hurt someone, so it must be right every time.">
+          <div class="q"><small>Question 1</small>A pharmacy bot answers questions. Which must be right every single time?</div>
+          <div class="options">
+            <button data-why="A slightly long reply annoys people, but harms no one.">Keeping replies short</button>
+            <button data-right>The dose of a medicine</button>
+            <button data-why="Nice to have, not a safety issue.">Using the customer's name</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson7.html#2" data-topic="build tests from real chats" data-right="Yes. Real messages, including the tricky and risky ones, show how the bot does in real life.">
+          <div class="q"><small>Question 2</small>Where should a food delivery bot's test cases come from?</div>
+          <div class="options">
+            <button data-right>Real customer messages, including tricky and risky ones</button>
+            <button data-why="Made-up messages are cleaner than real ones, so they miss real problems.">Messages the team writes to cover each feature</button>
+            <button data-why="Only easy cases makes the pass rate look better than it is.">The 10 most common questions only</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson7.html#4" data-topic="pass rates" data-right="Yes. 72 ÷ 80 × 100% = 90%.">
+          <div class="q"><small>Question 3</small>A bot passes 72 of 80 tests. What's its pass rate?</div>
+          <div class="options">
+            <button data-why="That's the number that failed, as a count.">8%</button>
+            <button data-right>90%</button>
+            <button data-why="Check: 72 ÷ 80 = 0.9.">72%</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson7.html#5" data-topic="guardrails" data-right="Yes. A plain code check that the price matches the list runs on every reply, every time.">
+          <div class="q"><small>Question 4</small>A car rental bot sometimes quotes prices that aren't on the price list. What's the most reliable guardrail?</div>
+          <div class="options">
+            <button data-why="Prompts help, but a model can still slip. A code check can't.">Add "please be accurate" to the prompt</button>
+            <button data-right>Code that blocks any reply whose price isn't on the list</button>
+            <button data-why="Weekly reviews find mistakes after customers have seen them.">Review the chats every week</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson7.html#6" data-topic="watch it after launch" data-right="Yes. The number says something changed. The chats say what.">
+          <div class="q"><small>Question 5</small>Complaints about a bank's bot doubled this week. What do you do first?</div>
+          <div class="options">
+            <button data-right>Read the chats behind the complaints</button>
+            <button data-why="You don't know yet whether the model is the cause.">Switch to a bigger model</button>
+            <button data-why="Hiding complaints doesn't fix what caused them.">Make the complaint button harder to find</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">How do you put it in front of real users?</div>
+        <div><a href="lesson8.html">Lesson 8 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="7">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+sorter("bar", {
+  bins: [{ id: "all", label: "Right every time" }, { id: "most", label: "Right most of the time" }],
+  items: [
+    { t: "Quote the correct fee", bin: "all", why: "A wrong fee breaks trust, and money is involved." },
+    { t: "Never promise a job", bin: "all", why: "Northstar has had complaints about this." },
+    { t: "Hand grief and money worries to a person", bin: "all", why: "Getting this wrong hurts a family." },
+    { t: "Use a friendly tone", bin: "most", why: "Slightly stiff now and then is OK." },
+    { t: "Reply in the enquirer's language", bin: "most", why: "Important, but an English reply still helps." },
+    { t: "Keep replies under 60 words", bin: "most", why: "A long reply is annoying, not harmful." },
+  ],
+  done: "Sorted. Three must-haves, three nice-to-haves. Put both in the scope doc.",
+});
+
+picker("sets", "setsWhy");
+
+(function () {
+  const root = document.getElementById("grade"), btn = document.getElementById("gradeCheck"), say = document.getElementById("gradeSay");
+  const items = [["Facts are correct", false, "It promises a refund that doesn't exist."], ["Follows the rules", false, "It promises a job outcome, which the rules forbid."], ["Takes the right action", false, "A placement and refund question should go to a person."], ["Tone is right", true, "Friendly enough. Tone was the only thing it got right."]];
+  function build() {
+    root.innerHTML = items.map(([t], i) => `<label class="switch"><input type="checkbox" data-i="${i}"> <span>${t}</span></label>`).join("");
+    say.textContent = ""; say.className = "say-why";
+  }
+  btn.onclick = () => {
+    const boxes = [...root.querySelectorAll("input")];
+    const wrong = items.map((it, i) => boxes[i].checked !== it[1] ? i : -1).filter(i => i >= 0);
+    if (!wrong.length) { say.className = "say-why good"; say.textContent = "Right: it fails three of four checks. A friendly tone doesn't save a false promise."; }
+    else { say.className = "say-why bad"; const i = wrong[0]; say.textContent = `Look again at "${items[i][0]}": ${items[i][2]}`; }
+  };
+  build(); addReset(root, build);
+})();
+
+practice("prac1");
+
+sorter("guard", {
+  bins: [{ id: "send", label: "Send" }, { id: "block", label: "Block" }],
+  items: [
+    { t: "Full Stack is ₹1,35,000, with EMI available.", bin: "send", why: "That fee is in the current sheet." },
+    { t: "Full Stack is ₹1,45,000.", bin: "block", why: "That's the old fee. It's not in the current sheet." },
+    { t: "Every student is guaranteed a job!", bin: "block", why: "A job promise." },
+    { t: "I don't have hostel details. Shall a counsellor message you?", bin: "send", why: "Honest, and offers a person." },
+    { t: "Call Rahul on 99999 01237 for details.", bin: "block", why: "It shares someone's phone number." },
+    { t: "Saturday at 10:00 or 11:00?", bin: "send", why: "Nothing risky here." },
+  ],
+  done: "Sorted. Three blocked: a wrong fee, a job promise and a phone number. Each can be caught by plain code.",
+});
+
+picker("watch", "watchWhy");
+practice("prac2");
+</script>
+</body>
+</html>

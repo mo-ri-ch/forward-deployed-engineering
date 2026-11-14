@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interview practice</title>
+<meta name="description" content="Lesson 12 of Forward Deployed Engineering: mock case studies, system design and presenting your project.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 12 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Interview practice</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="What FDE interviews look like">
+      <h2>What FDE interviews look like</h2>
+      <p class="say">FDE interviews test the same two skill sets as the job: engineering, and looking after the customer.</p>
+      <p class="say">Most have a coding round, a case where you break down a vague business problem, an AI system design round, a role-play with an unhappy client, and questions about your past projects.</p>
+
+      <div class="activity">
+        <div class="do">Sort each interview question by its round</div>
+        <div id="rounds"></div>
+      </div>
+      <p class="hook">The case round worries people most.</p>
+    </section>
+
+    <section class="part" data-title="The decomposition case">
+      <h2>The decomposition case</h2>
+      <p class="say">The interviewer gives you a vague problem, like "A hospital wants AI. Where do you start?", and watches how you think.</p>
+      <p class="say">You already know the steps: they're Lesson 2. Ask questions before answering, and say your thinking out loud.</p>
+
+      <div class="activity">
+        <div class="do">Put the case steps in order</div>
+        <div id="steps"></div>
+      </div>
+      <p class="hook">Try one.</p>
+    </section>
+
+    <section class="part" data-title="Practise a case">
+      <h2>Practise a case</h2>
+      <p class="say">Here's a real-style case. Pick the answer a strong candidate would give at each step.</p>
+      <p class="say">There's no single right design. Interviewers grade how you get there: questions first, numbers, a small first version, and honest risks.</p>
+
+      <div class="activity">
+        <div class="do">"A hospital wants AI to help with appointment calls."</div>
+        <div class="chat" id="case"></div>
+        <p class="say-why" id="caseSay"></p>
+      </div>
+      <p class="hook">Cases often need quick estimates.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 12.1">
+      <h2>✏️ Practice 12.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        To estimate, break the number into parts you can guess, then multiply. Say each guess out loud.
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="900" data-hint="Find 30% of 3,000." data-work="3,000 × 0.3 = 900 unanswered calls a day.">
+          <div class="ask">1. The hospital gets 3,000 calls a day, and 30% go unanswered. How many is that a day?</div>
+        </div>
+        <div class="prob" data-answer="30" data-hint="Total minutes first: 600 × 3. Then divide by 60." data-work="600 × 3 = 1,800 minutes.<br>1,800 ÷ 60 = 30 hours.">
+          <div class="ask">2. Each call takes staff 3 minutes. If the system handles 600 calls a day, how many staff hours does that free up a day?</div>
+        </div>
+        <div class="prob" data-answer="19800" data-hint="Multiply the daily number by 22 working days." data-work="900 × 22 = 19,800 unanswered calls a month.">
+          <div class="ask">3. With 900 unanswered calls a day and 22 working days, how many unanswered calls is that a month?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="AI system design">
+      <h2>AI system design</h2>
+      <p class="say">In the design round you sketch the whole system. Interviewers check that you remember the unglamorous parts: protecting data, checking replies, and watching it after launch.</p>
+      <p class="say">You built every one of these pieces for Northstar. Now put them in the order a message passes through.</p>
+
+      <div class="activity">
+        <div class="do">Put the pieces in order, from message to monitoring</div>
+        <div id="design"></div>
+      </div>
+      <p class="hook">Now, an unhappy client.</p>
+    </section>
+
+    <section class="part" data-title="The client role-play">
+      <h2>The client role-play</h2>
+      <p class="say">An interviewer plays an upset client. They want to see you stay calm, take ownership, and turn the problem into a plan.</p>
+      <p class="say">Don't argue, and don't hide behind "AI makes mistakes".</p>
+
+      <div class="activity">
+        <div class="do">The "client" is upset</div>
+        <div class="chat" id="role"></div>
+        <p class="say-why" id="roleSay"></p>
+      </div>
+      <p class="hook">Last: your own project.</p>
+    </section>
+
+    <section class="part" data-title="Tell your project's story">
+      <h2>Tell your project's story</h2>
+      <p class="say">"Tell me about a project" comes up in every interview. Have your capstone story ready, in four parts: the problem, what you did, the result as a number, and what you learned.</p>
+      <p class="say">Keep it to about two minutes. They'll ask follow-up questions on whatever interests them.</p>
+
+      <div class="activity">
+        <div class="do">Build your two-minute story</div>
+        <div id="story"></div>
+        <div class="btnrow"><button class="primary" type="button" id="storyCheck">Check my story</button></div>
+        <p class="say-why" id="storySay"></p>
+      </div>
+      <p class="hook">One last test.</p>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all interview-style.</p>
+      <div class="test" data-test="12">
+        <div class="quiz" data-page="lesson12.html#2" data-topic="the decomposition case" data-right="Yes. Clarifying questions come first, so you solve the right problem.">
+          <div class="q"><small>Question 1</small>"A bank wants to use AI in its branches." What's your first move?</div>
+          <div class="options">
+            <button data-why="That's a solution before you know the problem.">Propose a chatbot for customers</button>
+            <button data-right>Ask what problem they most want solved, and how they'd measure it</button>
+            <button data-why="Tech choices come much later.">Pick which model to use</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson12.html#3" data-topic="practise a case" data-right="Yes. A small first version, aimed at the biggest measured pain.">
+          <div class="q"><small>Question 2</small>A shop says 60% of support emails are "where's my order?". What do you build first?</div>
+          <div class="options">
+            <button data-right>An automatic answer for order-status emails, and measure how many need a person</button>
+            <button data-why="Too big for a first version.">A system that handles every kind of email</button>
+            <button data-why="That doesn't touch the measured problem.">A new website design</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson12.html#4" data-topic="estimates" data-right="Yes. 400 × 0.25 = 100 a day.">
+          <div class="q"><small>Question 3</small>A clinic gets 400 calls a day, and a quarter are about test results. How many test-result calls a day?</div>
+          <div class="options">
+            <button data-why="That's the total, not a quarter.">400</button>
+            <button data-right>100</button>
+            <button data-why="A quarter of 400 is 400 ÷ 4.">25</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson12.html#5" data-topic="AI system design" data-right="Yes. Checking replies and watching it after launch are the parts people forget.">
+          <div class="q"><small>Question 4</small>A candidate's design has a channel, a model and a database. What's most clearly missing?</div>
+          <div class="options">
+            <button data-why="A bigger model isn't a missing piece.">A larger model</button>
+            <button data-right>Guardrails and monitoring</button>
+            <button data-why="Nice to have, but not the gap here.">A mobile app</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson12.html#6" data-topic="the client role-play" data-right="Yes. Own it, get the facts, and give a plan with a time.">
+          <div class="q"><small>Question 5</small>The "client" says: "Your bot gave a customer the wrong refund amount!" What's the best first reply?</div>
+          <div class="options">
+            <button data-why="Arguing makes it worse, even if the tests pass.">"That's odd. Our tests all pass."</button>
+            <button data-right>"I'm sorry. Can you send me that chat? I'll find the cause today and tell you the fix."</button>
+            <button data-why="True, but it sounds like an excuse.">"AI models sometimes make mistakes."</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="You've finished">
+      <h2>You've finished</h2>
+      <div class="open-question">
+        <div>You've run a whole engagement</div>
+        <div class="big">From a vague brief to a working system, measured and looked after.</div>
+        <div>Now finish your capstone, put it on GitHub, and start applying.</div>
+      </div>
+      <p class="say">Come back to any lesson before an interview: the practice pages and tests are the fastest review.</p>
+      <p><button class="done-toggle" data-done="12">Mark lesson as done</button></p>
+      <p><a class="btn" href="../">← Back to the course</a></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+sorter("rounds", {
+  bins: [{ id: "code", label: "Coding" }, { id: "case", label: "Case and design" }, { id: "people", label: "People" }],
+  items: [
+    { t: "Write a function that removes duplicate leads", bin: "code", why: "Plain coding." },
+    { t: "This test is failing. Find out why.", bin: "code", why: "Debugging someone else's code." },
+    { t: "A hospital wants AI. Where do you start?", bin: "case", why: "A decomposition case." },
+    { t: "Design a support bot for a million users", bin: "case", why: "System design." },
+    { t: "The client says your bot embarrassed them", bin: "people", why: "A client role-play." },
+    { t: "Tell me about a project that went wrong", bin: "people", why: "About your past work." },
+  ],
+  done: "Sorted. Two of each, so prepare for all three.",
+});
+
+orderer("steps", {
+  steps: ["Ask clarifying questions", "Name the users and their goal", "Pick a success metric, with a baseline", "List options and score them", "Choose the smallest first version", "Name the risks and guardrails", "Say how you'd measure it after launch"],
+  done: "That's discovery, out loud, in 30 minutes.",
+});
+
+chatPick("case", "caseSay", {
+  who: "Interviewer",
+  turns: [
+    { q: "Where do you start?", a: [
+      ["I'd build a voice bot on the newest model.", "That's a solution before you know the problem."],
+      ["First I'd ask: how many calls a day, what callers want most, and what goes wrong today.", null],
+      ["I'd look at what other hospitals use.", "Useful later, but it skips this hospital's problem."]] },
+    { q: "3,000 calls a day. Most are rescheduling, and 30% go unanswered, mostly at lunchtime. What do you build first?", a: [
+      ["Something that handles rescheduling, starting at lunchtime, and passes anything medical to staff. I'd measure unanswered calls.", null],
+      ["Everything: booking, billing and medical advice.", "Too big, and medical advice is high-risk."],
+      ["A chatbot on the website.", "Callers are phoning. A website bot misses them."]] },
+    { q: "What could go wrong?", a: [
+      ["Nothing, if the model is good.", "Interviewers want honest risks, not confidence."],
+      ["It could give medical advice or book the wrong doctor. Guardrails block medical questions, and every change is confirmed by text.", null],
+      ["Patients might not like AI.", "Possible, but vague. Name concrete risks and how you'd stop them."]] },
+  ],
+  endLine: "Good. That's a clear, safe plan.",
+  end: "Questions first, numbers, a small first version and honest risks. That's a strong case.",
+});
+
+practice("prac1");
+
+orderer("design", {
+  steps: ["Message arrives from the channel", "Hide personal details", "Find relevant chunks", "Model call, with tools", "Guardrails check the reply", "Send the reply", "Log and monitor"],
+  done: "That's the whole system. In an interview, say why each piece is there.",
+});
+
+chatPick("role", "roleSay", {
+  who: "Client",
+  turns: [
+    { q: "Your bot told a parent the wrong fee, and they shouted at my counsellor!", a: [
+      ["That can't be right. Our tests all pass.", "Arguing makes the client feel unheard, and they may be right."],
+      ["I'm sorry, that shouldn't happen. Can you send me that chat? I'll find the cause today and tell you what we're changing.", null],
+      ["Models make mistakes sometimes.", "True, but it sounds like an excuse. Own it."]] },
+    { q: "How do I know it won't happen again?", a: [
+      ["You'll have to trust us.", "Trust comes from a plan, not a request."],
+      ["I'll add that chat to our tests so it can't come back, and send you the fix by tomorrow.", null],
+      ["We'll switch to a better model.", "That's a guess, not a fix you can prove."]] },
+  ],
+  endLine: "OK. Thanks for taking it seriously.",
+  end: "Calm, owning it, a plan with a time. That's what the role-play looks for.",
+});
+
+lineBuilder("story", "storyCheck", "storySay", {
+  lines: [
+    { k: "Problem", opts: ["I built an AI chatbot", "Night enquiries at a skills institute waited 10 hours, so leads went cold", "AI is the future"], right: 1, why: "Start with the client's problem, not the technology." },
+    { k: "What I did", opts: ["Used lots of tools", "Everything", "Ran discovery, built a RAG agent that books calls, and tested it with 40 evals"], right: 2, why: "Name the specific steps you took." },
+    { k: "Result", opts: ["First reply under 5 minutes in tests, and fee answers 100% correct", "It worked well", "Users loved it"], right: 0, why: "Give the number, before and after." },
+    { k: "What I learned", opts: ["Nothing went wrong", "The data was the hard part: two fee sheets disagreed, and fixing the source mattered more than the prompt", "AI is hard"], right: 1, why: "Share a real lesson. It shows you can learn from problems." },
+  ],
+  done: "Two minutes, four parts, one number. Practise saying it out loud.",
+});
+</script>
+</body>
+</html>

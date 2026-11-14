@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Life after launch</title>
+<meta name="description" content="Lesson 9 of Forward Deployed Engineering: watch real conversations, fix what breaks and help the client grow.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 9 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Life after launch</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="Read real conversations">
+      <h2>Read real conversations</h2>
+      <p class="say">Launch isn't the end. Real people write things your tests never imagined.</p>
+      <p class="say">So every week, read a sample of real chats and note what went wrong. Group the failures by kind, because one fix often solves a whole kind.</p>
+
+      <div class="activity">
+        <div class="do">What went wrong in each chat?</div>
+        <div id="fails"></div>
+      </div>
+      <p class="hook">Which kind do you fix first?</p>
+    </section>
+
+    <section class="part" data-title="Fix the biggest problem first">
+      <h2>Fix the biggest problem first</h2>
+      <p class="say">Count each kind of failure over a week. Then weigh each kind by the harm it does.</p>
+      <p class="say">A failure that's common but mild, where people just ask again, can wait. A rare one that breaks a must-be-right-every-time rule comes first.</p>
+
+      <div class="activity">
+        <div class="do">One week of failures. Which do you fix first?</div>
+        <div class="bars" id="bars"></div>
+        <div class="people" id="first" style="margin-top:12px">
+          <button class="person" type="button" data-why="The most common, but mild: people rephrase and get an answer. Fix it next."><b>Misunderstood messages (18)</b></button>
+          <button class="person" type="button" data-why="Important, but a wrong-info reply is often caught by the fee guardrail. Close second."><b>Wrong or missing info (9)</b></button>
+          <button class="person" type="button" data-right="Yes. Only 3, but each one left a family in trouble without a person. That breaks an every-time rule."><b>Missed handovers (3)</b></button>
+        </div>
+        <div class="say-why" id="firstWhy">Tap a kind.</div>
+      </div>
+      <p class="hook">And once it's fixed, keep it fixed.</p>
+    </section>
+
+    <section class="part" data-title="Every failure becomes a test">
+      <h2>Every failure becomes a test</h2>
+      <p class="say">When you find a failure, add that real chat to the eval set before you fix it. The new test fails, then your fix makes it pass, and it can never quietly come back.</p>
+      <p class="say">Bringing back an old bug by accident is called a <mark>regression</mark>. A growing eval set is how you prevent them.</p>
+
+      <div class="activity">
+        <div class="do">Step through one fix</div>
+        <ol class="day" id="fix">
+          <li><span class="t">find</span><span>"MERN course weekend batch?" got "We don't have a MERN course."</span></li>
+          <li><span class="t">test</span><span>Add it to the eval set: it must recognise MERN as Full Stack.</span></li>
+          <li><span class="t">run</span><span>Run the evals: the new test fails. Good: it shows the bug.</span></li>
+          <li><span class="t">fix</span><span>Add "also called MERN" to the Full Stack course page the agent searches.</span></li>
+          <li><span class="t">run</span><span>Run the evals again: the new test passes, and so do all the old ones.</span></li>
+          <li><span class="t">ship</span><span>Release the fix, and tell Arjun it's done.</span></li>
+        </ol>
+      </div>
+      <p class="hook">Let's work with the week's numbers.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 9.1">
+      <h2>✏️ Practice 9.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        This week: 18 misunderstood, 9 wrong or missing info, 3 missed handovers, 2 slow replies.<br>
+        <b class="eqbox">share = count ÷ total × 100%</b>
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="32" data-hint="Add up all four kinds." data-work="18 + 9 + 3 + 2 = 32 failures.">
+          <div class="ask">1. How many failures were there in total?</div>
+        </div>
+        <div class="prob" data-answer="56" data-tol="0.5" data-hint="Divide 18 by the total, then multiply by 100. Round to a whole number." data-work="18 ÷ 32 × 100% = 56.25%, about 56%.">
+          <div class="ask">2. What share were misunderstood messages, to the nearest whole %?</div>
+        </div>
+        <div class="prob" data-answer="23" data-hint="Half of 18 is 9. Take that away from the total." data-work="18 ÷ 2 = 9 fewer.<br>32 − 9 = 23 failures.">
+          <div class="ask">3. A fix halves the misunderstood messages. How many failures would the week have had?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Support at speed">
+      <h2>Support at speed</h2>
+      <p class="say">Northstar's staff will message you with problems and requests, often in a shared chat channel. Answer every message within a day, even if the answer is "looking into it".</p>
+      <p class="say">Then sort by urgency. Deciding what to handle first is called <mark>triage</mark>, like in a hospital.</p>
+
+      <div class="activity">
+        <div class="do">Triage this week's messages</div>
+        <div id="tri"></div>
+      </div>
+      <p class="hook">And every month, show what it's worth.</p>
+    </section>
+
+    <section class="part" data-title="Show the value">
+      <h2>Show the value</h2>
+      <p class="say">Once a month, show Priya the success metric you agreed on: before and after. Numbers, not adjectives.</p>
+      <p class="say">Then point to the next problem worth solving. Clients who see results usually ask for more. Starting small and growing with a client is called <mark>land and expand</mark>.</p>
+
+      <div class="activity">
+        <div class="do">Which monthly update would you send Priya?</div>
+        <div class="people" id="update">
+          <button class="person" type="button" data-why="That shows the agent is busy, not that Northstar is better off."><span>"The agent handled 2,412 chats and sent 7,980 messages this month."</span></button>
+          <button class="person" type="button" data-right="Yes. The agreed metric before and after, a business result, and the next problem to solve."><span>"Night enquiries now get a first reply in about 1 minute, down from 10 hours. Calls booked rose from 310 to 420. Next: students wait for mentors on basics. Shall we look at that?"</span></button>
+          <button class="person" type="button" data-why="Friendly, but Priya can't show this to anyone. Where are the numbers?"><span>"Everything is going really well, thanks for your support!"</span></button>
+        </div>
+        <div class="say-why" id="updateWhy">Tap an update.</div>
+      </div>
+      <p class="hook">Work out the numbers behind that update.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 9.2">
+      <h2>✏️ Practice 9.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <b class="eqbox">change % = (after − before) ÷ before × 100%</b><br>
+        <b class="eqbox">times faster = before ÷ after</b>
+      </div>
+      <div class="activity" id="prac2">
+        <div class="prob" data-answer="620" data-hint="Divide the old wait by the new one." data-work="620 minutes ÷ 1 minute = 620 times faster.">
+          <div class="ask">1. The median first reply at night went from 620 minutes to 1 minute. How many times faster is that?</div>
+        </div>
+        <div class="prob" data-answer="35" data-tol="0.6" data-hint="(420 − 310) ÷ 310 × 100. Round to a whole number." data-work="(420 − 310) ÷ 310 × 100% = 110 ÷ 310 × 100% = 35.5%, about 35%.">
+          <div class="ask">2. Calls booked went from 310 to 420 a month. By what % did they rise, to the nearest whole %?</div>
+        </div>
+        <div class="prob" data-answer="20" data-hint="(72 − 60) ÷ 60 × 100." data-work="(72 − 60) ÷ 60 × 100% = 12 ÷ 60 × 100% = 20%.">
+          <div class="ask">3. Students who joined went from 60 to 72 a month. By what % did they rise?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all on new examples.</p>
+      <div class="test" data-test="9">
+        <div class="quiz" data-page="lesson9.html#1" data-topic="read real conversations" data-right="Yes. Real chats show the mistakes your tests didn't imagine.">
+          <div class="q"><small>Question 1</small>A month after launch, all your tests still pass. Do you still need to read real chats?</div>
+          <div class="options">
+            <button data-why="Tests only cover what you thought of. Real people write new things every day.">No: the tests prove it works</button>
+            <button data-right>Yes: real people write things the tests don't cover</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson9.html#2" data-topic="fix the biggest problem first" data-right="Yes. Few, but each one can hurt someone, so it comes before the common, mild ones.">
+          <div class="q"><small>Question 2</small>A pharmacy bot's week: 40 typos misread, 2 wrong medicine doses. Which do you fix first?</div>
+          <div class="options">
+            <button data-why="Common but mild: people retype. A wrong dose can hurt someone.">The 40 misread typos</button>
+            <button data-right>The 2 wrong doses</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson9.html#3" data-topic="every failure becomes a test" data-right="Yes. The test fails first, proving it catches the bug, then passes after the fix, and guards against it returning.">
+          <div class="q"><small>Question 3</small>You find a bug in a live bot. What do you do before fixing it?</div>
+          <div class="options">
+            <button data-right>Add the failing chat to the eval set</button>
+            <button data-why="Telling the client is good, but first make sure the bug can't come back.">Email the client an apology</button>
+            <button data-why="A bigger model might not fix it, and you couldn't prove it did.">Switch to a bigger model</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson9.html#5" data-topic="support at speed" data-right="Yes. Customers are getting wrong prices right now, so it can't wait.">
+          <div class="q"><small>Question 4</small>A shop's staff report three things. Which do you handle today?</div>
+          <div class="options">
+            <button data-why="A nice idea, but nothing is broken.">"Could it also suggest gift ideas?"</button>
+            <button data-right>"It's showing last month's prices"</button>
+            <button data-why="Worth doing, but not urgent.">"The greeting feels a bit formal"</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson9.html#6" data-topic="show the value" data-right="Yes. The agreed metric, before and after, is what a sponsor can act on.">
+          <div class="q"><small>Question 5</small>Which line belongs in a monthly report to a clinic's director?</div>
+          <div class="options">
+            <button data-why="Activity, not value: the director can't tell if patients are better off.">"The bot sent 12,000 messages."</button>
+            <button data-right>"Missed appointments fell from 14% to 9%."</button>
+            <button data-why="No number, so nothing to act on.">"Patients seem happy with it."</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">How do you keep the client on your side?</div>
+        <div><a href="lesson10.html">Lesson 10 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="9">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+sorter("fails", {
+  bins: [{ id: "mis", label: "Misunderstood the message" }, { id: "info", label: "Wrong or missing info" }, { id: "hand", label: "Missed a handover" }],
+  items: [
+    { t: "\"MERN course weekend batch?\" → \"We don't have a MERN course.\"", bin: "mis", why: "MERN is the Full Stack course. It didn't know the other name." },
+    { t: "\"chetta fees ethra?\" → \"Sorry, I can only help in English.\"", bin: "mis", why: "It didn't understand the Malayalam-English question." },
+    { t: "\"New UI/UX course fee?\" → quoted the Graphic Design fee", bin: "info", why: "The new course isn't in the documents yet." },
+    { t: "\"Laptop specs for video?\" → \"Any laptop works!\"", bin: "info", why: "It made up an answer it didn't have." },
+    { t: "\"I lost my job, can't pay EMI this month\" → \"EMI is ₹10,500 a month.\"", bin: "hand", why: "Money trouble needs a person." },
+    { t: "\"Your counsellor was rude to my son\" → \"Want to book a call?\"", bin: "hand", why: "A complaint needs a person, quickly." },
+  ],
+  done: "Sorted. Three kinds of failure, and each kind has its own fix.",
+});
+
+(function () {
+  const bars = document.getElementById("bars");
+  const data = [["Misunderstood", 18], ["Wrong or missing info", 9], ["Missed handover", 3], ["Slow reply", 2]];
+  bars.innerHTML = data.map(([l, v]) => `<div class="row"><span>${l}</span><div class="fill" style="width:${v / 18 * 100}%"></div><span class="v">${v}</span></div>`).join("");
+})();
+picker("first", "firstWhy");
+stepper("fix");
+practice("prac1");
+
+sorter("tri", {
+  bins: [{ id: "now", label: "Today" }, { id: "week", label: "This week" }, { id: "later", label: "Later" }],
+  items: [
+    { t: "\"It's quoting last year's fee!\"", bin: "now", why: "Parents are getting a wrong fee right now." },
+    { t: "\"WhatsApp replies stopped an hour ago.\"", bin: "now", why: "Nobody is getting answers." },
+    { t: "\"Handover notes should include the course.\"", bin: "week", why: "A real improvement, but nothing is broken." },
+    { t: "\"Handover notes go to the wrong campus.\"", bin: "week", why: "Annoying, and counsellors can forward them meanwhile." },
+    { t: "\"Can it answer in Hindi too?\"", bin: "later", why: "A new feature: agree it with Priya first." },
+    { t: "\"The welcome message sounds a bit stiff.\"", bin: "later", why: "Nice to fix, not urgent." },
+  ],
+  done: "Triaged. Broken things today, improvements this week, new ideas agreed with the sponsor first.",
+});
+
+picker("update", "updateWhy");
+practice("prac2");
+</script>
+</body>
+</html>

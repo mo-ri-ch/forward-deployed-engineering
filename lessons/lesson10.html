@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talking to the client</title>
+<meta name="description" content="Lesson 10 of Forward Deployed Engineering: demos, short updates and handling pushback calmly.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 10 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Talking to the client</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="The weekly update">
+      <h2>The weekly update</h2>
+      <p class="say">Clients get nervous when they hear nothing. Send a short update at the same time every week, even when little changed.</p>
+      <p class="say">Four parts, a line each: what's <b>done</b>, what's <b>next</b>, what's <b>blocked</b>, and one <b>number</b> that shows progress.</p>
+
+      <div class="activity">
+        <div class="do">Write this Friday's update to Priya</div>
+        <div id="upd"></div>
+        <div class="btnrow"><button class="primary" type="button" id="updCheck">Check my update</button></div>
+        <p class="say-why" id="updSay"></p>
+      </div>
+      <p class="hook">Updates say it. Demos show it.</p>
+    </section>
+
+    <section class="part" data-title="Demos that land">
+      <h2>Demos that land</h2>
+      <p class="say">A demo isn't a tour of features. It shows the client their own problem being solved, with their own data.</p>
+      <p class="say">Start with the problem they told you about, show it happen and get solved, show the number, then ask what would stop them using it.</p>
+
+      <div class="activity">
+        <div class="do">Put the demo in order</div>
+        <div id="demo"></div>
+      </div>
+      <p class="hook">Sometimes the news is bad.</p>
+    </section>
+
+    <section class="part" data-title="Bad news early">
+      <h2>Bad news early</h2>
+      <p class="say">WhatsApp hasn't approved Northstar's business account yet, so the launch will slip a week.</p>
+      <p class="say">Bad news gets worse with time. Tell the client as soon as you know: what happened, the new date, and what you're doing about it. No blame, no excuses.</p>
+
+      <div class="activity">
+        <div class="do">Priya asks about the launch</div>
+        <div class="chat" id="bad"></div>
+        <p class="say-why" id="badSay"></p>
+      </div>
+      <p class="hook">Practise a few more.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 10.1">
+      <h2>✏️ Practice 10.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        Updates: done, next, blocked, one number.<br>
+        Demos: their problem, their data, the number, then ask.<br>
+        Bad news: early, with the new date and your plan.
+      </div>
+      <div class="activity">
+        <div class="quiz" data-right="Yes. A number the sponsor agreed to is the best progress line.">
+          <div class="q">Which line best shows progress in a weekly update?</div>
+          <div class="options">
+            <button data-why="Effort, not progress.">"We worked really hard this week."</button>
+            <button data-right>"Fee answers: 60 of 60 tests now pass."</button>
+            <button data-why="The client doesn't measure progress in lines of code.">"We wrote 800 lines of code."</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-right="Yes. Their own case lands far better than a feature tour.">
+          <div class="q">You're demoing to Arjun. What do you show first?</div>
+          <div class="options">
+            <button data-right>A real night-time enquiry getting an instant reply</button>
+            <button data-why="Arjun doesn't care how it's built. Show his problem solved.">The architecture diagram</button>
+            <button data-why="Settings aren't the point. Show the result.">The admin settings page</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-right="Yes. Tell them now, with a new date and a plan.">
+          <div class="q">On Tuesday you realise Thursday's demo won't be ready. When do you tell the client?</div>
+          <div class="options">
+            <button data-why="Waiting turns a small slip into a broken promise.">Thursday morning, in case you finish</button>
+            <button data-right>Today, with a new date</button>
+            <button data-why="Showing something half-working without warning damages trust.">Never: demo what you have</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="When the scope grows">
+      <h2>When the scope grows</h2>
+      <p class="say">Once a client sees something working, the requests come: "Can it also…?" New work quietly added to an agreed project is called <mark>scope creep</mark>. It's how projects end up late and half-done.</p>
+      <p class="say">Don't say a flat no. Say what it would cost, and offer a choice.</p>
+
+      <div class="activity">
+        <div class="do">Priya passes on a request from Rahul</div>
+        <div class="chat" id="creep"></div>
+        <p class="say-why" id="creepSay"></p>
+      </div>
+      <p class="hook">Whatever you write, keep it short.</p>
+    </section>
+
+    <section class="part" data-title="Write for busy people">
+      <h2>Write for busy people</h2>
+      <p class="say">Priya reads your email on her phone, between meetings. Put the point in the subject and the first line. Ask for one thing, with a date.</p>
+      <p class="say">If she has to read twice to find out what you need, it waits.</p>
+
+      <div class="activity">
+        <div class="do">You need Kevin to approve calendar access by Wednesday. Which email?</div>
+        <div class="people" id="email">
+          <button class="person" type="button" data-why="The ask is buried in the third paragraph, and there's no date."><b>Subject: Update</b><span>"Hi Kevin, hope you're well! This week we've been working on lots of things, including the booking flow, which has been interesting because…"</span></button>
+          <button class="person" type="button" data-right="Yes. The ask and the date are in the subject. The why fits in one line."><b>Subject: Approve calendar access by Wed?</b><span>"Hi Kevin, the agent needs read and book access to the counselling calendar to start booking calls. Could you approve it by Wednesday? Here's exactly what it can and can't see."</span></button>
+          <button class="person" type="button" data-why="Shouting creates stress, not action. And it still doesn't say why."><b>Subject: URGENT!!!</b><span>"NEED CALENDAR ACCESS ASAP."</span></button>
+        </div>
+        <div class="say-why" id="emailWhy">Tap an email.</div>
+      </div>
+      <p class="hook">Practise a couple more.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 10.2">
+      <h2>✏️ Practice 10.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        New requests: name the cost, offer a choice.<br>
+        Emails: the point first, one ask, a date.
+      </div>
+      <div class="activity">
+        <div class="quiz" data-right="Yes. It names the cost and lets the sponsor choose.">
+          <div class="q">Mid-project, Arjun asks for a weekly report of every chat. It's two days of work. What do you say?</div>
+          <div class="options">
+            <button data-why="Saying yes to everything is how the launch slips.">"Sure, done by Monday."</button>
+            <button data-right>"Happy to. It's about two days, so launch moves to Wednesday. Or we add it right after launch?"</button>
+            <button data-why="A flat no makes Arjun feel unheard.">"That's not in the scope doc."</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-right="Yes. The ask and the deadline are visible before she opens it.">
+          <div class="q">Which subject line gets a quick answer from a busy sponsor?</div>
+          <div class="options">
+            <button data-why="This doesn't say what you need.">"Quick question"</button>
+            <button data-right>"OK to launch at night only from Monday?"</button>
+            <button data-why="This says nothing about what you need.">"Following up"</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all on new examples.</p>
+      <div class="test" data-test="10">
+        <div class="quiz" data-page="lesson10.html#1" data-topic="the weekly update" data-right="Yes. It's specific, with a date, so the client can act on it.">
+          <div class="q"><small>Question 1</small>Which "blocked" line is most useful in a weekly update to a retailer?</div>
+          <div class="options">
+            <button data-why="Too vague to act on.">"A few things are slow."</button>
+            <button data-right>"Waiting for the product list from your team. Needed by Tuesday."</button>
+            <button data-why="Blaming someone doesn't help them fix it.">"Your team hasn't sent anything."</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson10.html#2" data-topic="demos that land" data-right="Yes. Start with their problem, solved with their own data.">
+          <div class="q"><small>Question 2</small>How should a demo to a clinic's front desk start?</div>
+          <div class="options">
+            <button data-right>With a real patient call being booked, the way they handle it today</button>
+            <button data-why="Features don't show their problem being solved.">With a list of the bot's features</button>
+            <button data-why="Slides about AI don't show anything working.">With slides about how AI works</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson10.html#3" data-topic="bad news early" data-right="Yes. Early, honest, with a new date and a plan.">
+          <div class="q"><small>Question 3</small>A data export from the client's old system will take a week longer than planned. What do you tell the client?</div>
+          <div class="options">
+            <button data-why="If it doesn't work out, you've broken trust twice.">Nothing yet: you might catch up</button>
+            <button data-why="Blame makes the client defensive and fixes nothing.">"Your old system is the problem."</button>
+            <button data-right>"The export needs another week, so launch moves to the 20th. Meanwhile we're testing with sample data."</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson10.html#5" data-topic="when the scope grows" data-right="Yes. Name the cost, offer a choice, and let the sponsor decide.">
+          <div class="q"><small>Question 4</small>A week before launch, the client asks you to add voice calls. What's the best reply?</div>
+          <div class="options">
+            <button data-right>"Voice is a big piece of work, about a month. Launch text first, then start on voice?"</button>
+            <button data-why="Saying yes now puts the whole launch at risk.">"Sure, we'll fit it in."</button>
+            <button data-why="A flat no ignores a real need.">"No, that's not what we agreed."</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson10.html#6" data-topic="write for busy people" data-right="Yes. The point and the ask come first.">
+          <div class="q"><small>Question 5</small>What should the first line of an email asking for a decision say?</div>
+          <div class="options">
+            <button data-why="Pleasantries push the point down.">"Hope you had a great weekend!"</button>
+            <button data-right>The decision you need, and by when</button>
+            <button data-why="Background can come after the ask.">The full background of the project</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">Can you run a whole engagement on your own?</div>
+        <div><a href="lesson11.html">Lesson 11 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="10">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+lineBuilder("upd", "updCheck", "updSay", {
+  lines: [
+    { k: "Done", opts: ["Worked on lots of stuff", "Fee answers now come only from the current sheet. 60 of 60 tests pass.", "Big progress"], right: 1, why: "Say exactly what's finished, with proof." },
+    { k: "Next", opts: ["More improvements", "Whatever comes up", "Booking calls from chat, ready to demo on Thursday"], right: 2, why: "Name the next piece and when she'll see it." },
+    { k: "Blocked", opts: ["Waiting for Kevin to approve calendar access. Needed by Tuesday.", "Nothing, as usual", "Kevin is slow"], right: 0, why: "Say what you need, from whom, by when, without blame." },
+    { k: "Number", opts: ["The agent is great", "Night first reply: 10 hours down to 4 minutes, in the night-only test", "We wrote 400 lines of code"], right: 1, why: "Use the success metric you agreed on." },
+  ],
+  done: "Four lines Priya can read in 20 seconds, and forward to her boss.",
+});
+
+orderer("demo", {
+  steps: ["Remind them of the problem: night enquiries wait about 10 hours", "Send a real night-time enquiry from a phone", "Show the instant reply and the booked call", "Show the number: first reply time, before and after", "Ask: what would stop you using this?"],
+  done: "Problem, proof, number, then their concerns. A demo that ends with a question gets you real feedback.",
+});
+
+chatPick("bad", "badSay", {
+  who: "Priya",
+  turns: [
+    { q: "Are we still launching on Monday?", a: [
+      ["Yes, should be fine!", "You know it won't be. She'll find out Monday, and trust takes a hit."],
+      ["No, it'll be the Monday after. WhatsApp hasn't approved the business account yet. Meanwhile counsellors keep testing, so we lose nothing.", null],
+      ["It's WhatsApp's fault, not ours.", "Blame doesn't help her plan. Give the new date and your plan."]] },
+    { q: "Can't you just push it through?", a: [
+      ["No.", "True, but it leaves her with nothing. Say what you are doing."],
+      ["We could skip approval and use someone's personal number.", "That breaks WhatsApp's rules and risks getting the number banned."],
+      ["I've raised it with WhatsApp support, and I'll update you on Thursday either way.", null]] },
+  ],
+  endLine: "OK. Thanks for telling me early.",
+  end: "Early, honest, a new date and a plan. Her trust grew, even with bad news.",
+});
+
+chatPick("creep", "creepSay", {
+  who: "Priya",
+  turns: [
+    { q: "Rahul asks: can the agent also answer students' coding doubts, by Friday?", a: [
+      ["Sure, I'll add it!", "Then Friday's launch slips, and coding answers go out untested."],
+      ["That's out of scope.", "A flat no makes Rahul feel ignored. His problem is real."],
+      ["Good idea: it's the mentor helper we scored. Adding it now moves launch by about three weeks. Shall we launch admissions first, then start on it?", null]] },
+  ],
+  endLine: "Launch first. Then let's plan the mentor helper.",
+  end: "You named the cost and gave a choice. The scope stayed safe, and the next project is lined up.",
+});
+
+picker("email", "emailWhy");
+</script>
+</body>
+</html>

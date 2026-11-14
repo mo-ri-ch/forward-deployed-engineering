@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agents and workflows</title>
+<meta name="description" content="Lesson 6 of Forward Deployed Engineering: qualify a lead and book a counselling call, step by step.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 6 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Agents and workflows</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="From answering to acting">
+      <h2>From answering to acting</h2>
+      <p class="say">So far the model answers. Booking a counselling call takes more: find free slots, ask which one suits, book it, confirm.</p>
+      <p class="say">A system that repeats a loop of <b>decide → use a tool → look at the result</b> until the job is done is called an <mark>agent</mark>.</p>
+
+      <div class="activity">
+        <div class="do">Step through the agent booking a call</div>
+        <ol class="day" id="loop">
+          <li><span class="t">them</span><span>"I'm Tom, Python course. Can I book a call Saturday morning?"</span></li>
+          <li><span class="t">decide</span><span>I need free slots. Use <code>find_slots</code>.</span></li>
+          <li><span class="t">result</span><span>Anand 10:00 and 11:00, Divya 10:00 and 11:00, Meera 10:00.</span></li>
+          <li><span class="t">reply</span><span>"Saturday at 10:00 or 11:00?" Tom: "10:00 please."</span></li>
+          <li><span class="t">decide</span><span>Book it. Use <code>book_call(Anand, Sat 21 Nov 10:00, Tom)</code>.</span></li>
+          <li><span class="t">result</span><span>Booked.</span></li>
+          <li><span class="t">reply</span><span>"Done! Anand will see you Saturday at 10:00."</span></li>
+        </ol>
+      </div>
+      <p class="hook">Does everything need an agent?</p>
+    </section>
+
+    <section class="part" data-title="Workflow or agent?">
+      <h2>Workflow or agent?</h2>
+      <p class="say">When the steps are always the same, write them in code, in order. That's a <mark>workflow</mark>. It's predictable, cheap and easy to test.</p>
+      <p class="say">Use an agent only when the next step depends on what the person says.</p>
+      <p class="say">Good FDEs use the simplest thing that works.</p>
+
+      <div class="activity">
+        <div class="do">Sort each job</div>
+        <div id="wsort"></div>
+      </div>
+      <p class="hook">An agent also has to remember things.</p>
+    </section>
+
+    <section class="part" data-title="Remember the conversation">
+      <h2>Remember the conversation</h2>
+      <p class="say">People give details bit by bit, across many messages. The agent keeps what it has learned so far in a small record, and updates it each turn.</p>
+      <p class="say">That record is the conversation's <mark>state</mark>. It's also what gets saved to the lead tracker at the end.</p>
+
+      <div class="activity">
+        <div class="do">Watch the state fill in</div>
+        <div class="twocol">
+          <div class="chat" id="sChat"></div>
+          <div><p class="cap">State</p><table class="mini" id="sTable"></table></div>
+        </div>
+        <div class="btnrow" id="sBtns"></div>
+      </div>
+      <p class="hook">Now, booking safely.</p>
+    </section>
+
+    <section class="part" data-title="Book without double booking">
+      <h2>Book without double booking</h2>
+      <p class="say">In discovery you found Rohan and Kavya both booked into Divya's 11:00 slot on 17 November. People were booking from an old view of the calendar.</p>
+      <p class="say">An agent can make the same mistake: it finds a free slot, chats for a minute, then books, and meanwhile someone else took it.</p>
+
+      <div class="activity">
+        <div class="do">The agent offered Divya, 17 Nov, 15:00. Two minutes later the parent says yes. What should it do?</div>
+        <div class="people" id="book">
+          <button class="person" type="button" data-why="That's exactly how Rohan and Kavya ended up in the same slot."><b>Book it: it was free two minutes ago</b></button>
+          <button class="person" type="button" data-right="Yes. Check again at the moment of booking. If it's gone, offer the next free slot instead."><b>Check it's still free, then book. If not, offer the next free slot</b></button>
+          <button class="person" type="button" data-why="That throws away the whole point: the parent wanted it done now."><b>Ask the parent to phone the office instead</b></button>
+        </div>
+        <div class="say-why" id="bookWhy">Tap an action.</div>
+      </div>
+      <p class="hook">Let's read the calendar.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 6.1">
+      <h2>✏️ Practice 6.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        Only a slot marked <b>Free</b> can be booked. Booked, Blocked and Leave slots can't.
+      </div>
+      <div class="activity" id="prac1">
+        <p class="cap">Counselling slots, Tuesday 24 November</p>
+        <div class="tablewrap"><table class="mini">
+          <tr><th>Counsellor</th><th>11:00</th><th>15:00</th><th>18:00</th></tr>
+          <tr><td>Anand</td><td>Free</td><td>Free</td><td>Free</td></tr>
+          <tr><td>Divya</td><td>Free</td><td>Free</td><td>Booked (Abdul)</td></tr>
+          <tr><td>Meera</td><td>Free</td><td>Free</td><td>Free</td></tr>
+        </table></div>
+        <div class="prob" data-answer="8" data-hint="Count the cells that say Free." data-work="9 slots, 1 booked: 9 − 1 = 8 free.">
+          <div class="ask">1. How many slots are free on 24 November?</div>
+        </div>
+        <div class="prob" data-answer="2" data-hint="Look only at the 18:00 column." data-work="At 18:00, Anand and Meera are free. Divya is booked. So 2.">
+          <div class="ask">2. A working parent can only talk at 18:00. How many counsellors are free then?</div>
+        </div>
+        <div class="prob" data-answer="6" data-hint="Each weekday has 3 slots per counsellor." data-work="3 slots a day × 2 days = 6 slots.">
+          <div class="ask">3. Divya is on leave on 19 and 20 November (both weekdays). How many of her slots does that take out?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Hand over to a person">
+      <h2>Hand over to a person</h2>
+      <p class="say">Some chats need a person: money trouble, grief, refunds, complaints, or when the agent isn't sure. Passing the chat to a person is a <mark>handover</mark>.</p>
+      <p class="say">A good handover includes a short note, so the counsellor knows the story and the family doesn't have to repeat it.</p>
+
+      <div class="activity">
+        <div class="do">Which handover note would you want as the counsellor?</div>
+        <div class="people" id="hand">
+          <button class="person" type="button" data-why="The counsellor has to start from zero, and the mother repeats a painful story."><span>"Customer needs help."</span></button>
+          <button class="person" type="button" data-right="Yes. Who, what they want, what worries them, and when to call, in two lines."><span>"Lakshmi (mother). Daughter on a gap year after two failed entrance exams, losing confidence. Interested in Graphic Design. Prefers a call after 6 pm."</span></button>
+          <button class="person" type="button" data-why="Everything is there, but a busy counsellor won't read 40 messages before calling."><span>The full chat: all 40 messages.</span></button>
+        </div>
+        <div class="say-why" id="handWhy">Tap a note.</div>
+      </div>
+      <p class="hook">What if the agent itself goes wrong?</p>
+    </section>
+
+    <section class="part" data-title="Stop it going wrong">
+      <h2>Stop it going wrong</h2>
+      <p class="say">Tools sometimes fail or time out. An agent that simply tries again can book the same call twice.</p>
+      <p class="say">An action that's safe to repeat, because doing it twice has the same effect as doing it once, is called <mark>idempotent</mark>. Make booking idempotent, and cap how many steps one message may take.</p>
+
+      <div class="activity">
+        <div class="do">book_call timed out and the agent retried. Tom now has two bookings. What's the fix?</div>
+        <div class="people" id="retry">
+          <button class="person" type="button" data-why="More tries means more chances of duplicate bookings, and a runaway bill."><b>Let it retry up to 20 times</b></button>
+          <button class="person" type="button" data-right="Yes. If Tom already has that booking, the retry changes nothing. And a step limit stops runaway loops."><b>Before booking, check if Tom already has that booking. Allow at most 5 steps per message.</b></button>
+          <button class="person" type="button" data-why="Then the agent can't do the main job Priya agreed to."><b>Turn off booking completely</b></button>
+        </div>
+        <div class="say-why" id="retryWhy">Tap a fix.</div>
+      </div>
+      <p class="hook">How many steps can it afford?</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 6.2">
+      <h2>✏️ Practice 6.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <b class="eqbox">reply time ≈ steps × time per step</b>
+      </div>
+      <div class="activity" id="prac2">
+        <div class="prob" data-answer="6|6s" data-hint="Multiply the steps by the seconds per step." data-work="3 steps × 2 seconds = 6 seconds.">
+          <div class="ask">1. Each step (a model call or a tool) takes about 2 seconds. A booking takes 3 steps. About how long until the reply, in seconds?</div>
+        </div>
+        <div class="prob" data-answer="5" data-hint="How many 2-second steps fit in 10 seconds?" data-work="10 ÷ 2 = 5 steps at most.">
+          <div class="ask">2. Northstar wants every reply within 10 seconds. What's the most steps one message can take?</div>
+        </div>
+        <div class="prob" data-answer="6000" data-hint="Multiply the enquiries by the average steps." data-work="2,500 × 2.4 = 6,000 steps a month.">
+          <div class="ask">3. 2,500 enquiries a month take 2.4 steps on average. How many steps is that a month?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Five questions, all on new examples.</p>
+      <div class="test" data-test="6">
+        <div class="quiz" data-page="lesson6.html#2" data-topic="workflow or agent?" data-right="Yes. The steps never change, so plain code in order is simpler, cheaper and easier to test.">
+          <div class="q"><small>Question 1</small>A gym wants an SMS sent the day before every class booking. Workflow or agent?</div>
+          <div class="options">
+            <button data-right>Workflow</button>
+            <button data-why="Nothing here depends on what a person says. The steps are always the same.">Agent</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson6.html#3" data-topic="remember the conversation" data-right="Yes. The state keeps what was already said, so the bot doesn't ask again.">
+          <div class="q"><small>Question 2</small>A hotel bot keeps asking for the guest's dates, which they gave three messages ago. What's missing?</div>
+          <div class="options">
+            <button data-why="A tool wouldn't help here: the answer is already in the chat.">A tool for checking dates</button>
+            <button data-right>State that keeps what the guest already said</button>
+            <button data-why="Temperature changes wording, not memory.">A lower temperature</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson6.html#4" data-topic="book without double booking" data-right="Yes. Checking at the moment of booking stops two people getting the same table.">
+          <div class="q"><small>Question 3</small>A restaurant bot found a free table 5 minutes ago. The diner now says yes. What should it do?</div>
+          <div class="options">
+            <button data-right>Check the table is still free, then book it</button>
+            <button data-why="Someone else may have taken it in those 5 minutes.">Book it straight away</button>
+            <button data-why="The diner asked the bot to book. Sending them elsewhere fails them.">Tell the diner to call the restaurant</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson6.html#6" data-topic="hand over to a person" data-right="Yes. Grief and money need a person, with a short note so the family doesn't repeat the story.">
+          <div class="q"><small>Question 4</small>On an insurance bot, someone writes that their husband just died and they need to claim. What should happen?</div>
+          <div class="options">
+            <button data-why="Forms first feels cold here. This needs a person.">The bot sends the claim form</button>
+            <button data-right>Hand over to a person, with a short note of what's known</button>
+            <button data-why="Asking for policy numbers first is cold, and the person may not have them to hand.">The bot asks for the policy number first</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson6.html#7" data-topic="stop it going wrong" data-right="Yes. Sending the same payment twice must have the same effect as once.">
+          <div class="q"><small>Question 5</small>A payment tool times out and the agent retries. Which design is safe?</div>
+          <div class="options">
+            <button data-why="That's how customers get charged twice.">Retry until it works</button>
+            <button data-right>Before retrying, check whether the payment already went through</button>
+            <button data-why="Never retrying means real payments fail for no reason.">Never retry anything</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">How do you prove it works before real people use it?</div>
+        <div><a href="lesson7.html">Lesson 7 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="6">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+stepper("loop", { after: (i, n) => i === n - 1 ? "Two tools, two loops, one booked call." : "" });
+
+sorter("wsort", {
+  bins: [{ id: "wf", label: "Workflow: same steps every time" }, { id: "ag", label: "Agent: depends on the person" }],
+  items: [
+    { t: "Send a reminder 1 hour before every booked call", bin: "wf", why: "Always the same steps." },
+    { t: "Copy new leads into the tracker every night", bin: "wf", why: "A fixed job on a timer." },
+    { t: "Hide the phone number before every model call", bin: "wf", why: "Always done, always the same way." },
+    { t: "Answer whatever a parent asks, in any order", bin: "ag", why: "The next step depends on what they ask." },
+    { t: "Help a career switcher choose a course", bin: "ag", why: "It depends on their answers." },
+    { t: "\"Move my call to Saturday, and what's the fee?\"", bin: "ag", why: "Two jobs, chosen by the person." },
+  ],
+  done: "Sorted. Half of these need no agent at all.",
+});
+
+(function () {
+  const chat = document.getElementById("sChat"), table = document.getElementById("sTable"), btns = document.getElementById("sBtns");
+  const turns = [
+    { m: "hi", set: {} },
+    { m: "I'm Priyanka. Digital marketing course?", set: { name: "Priyanka", course: "Digital Marketing" } },
+    { m: "I work in a shop till 6 pm. Online possible?", set: { mode: "Online", note: "works till 6 pm" } },
+    { m: "Can someone call me after work?", set: { call: "after 18:00" } },
+  ];
+  const keys = [["name", "Name"], ["course", "Course"], ["mode", "Mode"], ["call", "Call time"], ["note", "Note"]];
+  let i, state;
+  const back = document.createElement("button"); back.type = "button"; back.textContent = "← Back";
+  const next = document.createElement("button"); next.type = "button"; next.className = "primary"; next.textContent = "Next message →";
+  btns.append(back, next);
+  function draw() {
+    state = {}; turns.slice(0, i + 1).forEach(t => Object.assign(state, t.set));
+    chat.innerHTML = turns.slice(0, i + 1).map(t => `<div class="bub them"><small>Enquirer</small>${esc(t.m)}</div>`).join("");
+    const changed = turns[i].set;
+    table.innerHTML = keys.map(([k, l]) => `<tr><td>${l}</td><td${changed[k] ? ' style="background:var(--hl-yellow);color:var(--on-hl)"' : ""}>${state[k] ? esc(state[k]) : '<span class="muted-note">—</span>'}</td></tr>`).join("");
+    back.hidden = i === 0; next.hidden = i === turns.length - 1;
+  }
+  back.onclick = () => { i--; draw(); }; next.onclick = () => { i++; draw(); };
+  i = 0; draw(); addReset(table, () => { i = 0; draw(); });
+})();
+
+picker("book", "bookWhy");
+practice("prac1");
+picker("hand", "handWhy");
+picker("retry", "retryWhy");
+practice("prac2");
+</script>
+</body>
+</html>

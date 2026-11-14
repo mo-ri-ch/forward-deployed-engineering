@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Capstone</title>
+<meta name="description" content="Lesson 11 of Forward Deployed Engineering: a full engagement from brief to demo, for your portfolio.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 11 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Capstone</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <section class="part" data-title="Your engagement">
+      <h2>Your engagement</h2>
+      <p class="say">You've seen one engagement from brief to life after launch. Now you run one on your own. This final project is your <mark>capstone</mark>, and it becomes the main project on your portfolio.</p>
+      <p class="say">Northstar has three more problems from the problem tree. Pick one. If you can work with a real organisation instead, do that, with their permission and with personal details removed.</p>
+
+      <div class="activity">
+        <div class="do">Pick your track to see its brief</div>
+        <div class="people" id="tracks">
+          <button class="person" type="button" data-right="<b>Mentor helper.</b> Stakeholder: Rahul, lead mentor. Problem: students wait hours for answers the course docs already have. Data: course docs and past student questions. A metric to start from: time until a student's doubt is answered."><b>Mentor helper</b><span>Answers students' doubts from the course docs.</span></button>
+          <button class="person" type="button" data-right="<b>Review helper.</b> Stakeholder: the reviewers. Problem: weekly reviews spend time on basics like missing tests. Data: sample student projects and past review notes. A metric to start from: review time spent on basics."><b>Review helper</b><span>Pre-checks student code before the weekly review.</span></button>
+          <button class="person" type="button" data-right="<b>Job matcher.</b> Stakeholder: Sana, placement manager. Problem: matching resumes to job descriptions by hand takes days. Data: resumes and job descriptions, with skill names that don't match. A metric to start from: days from a new job to a shortlist."><b>Job matcher</b><span>Matches students to hiring partners' jobs.</span></button>
+        </div>
+        <div class="say-why" id="tracksWhy">Tap a track.</div>
+      </div>
+      <p class="hook">You'll need data.</p>
+    </section>
+
+    <section class="part" data-title="Make realistic data">
+      <h2>Make realistic data</h2>
+      <p class="say">You won't have a client's real data, and you must never use real people's details. So you make realistic data that looks real but isn't, called <mark>synthetic data</mark>.</p>
+      <p class="say">A model can help you make lots of it. But real data is messy, so plant the mess on purpose, like the two fee sheets and duplicate leads you met at Northstar.</p>
+
+      <div class="activity">
+        <div class="do">Put the steps in order</div>
+        <div id="synth"></div>
+      </div>
+      <p class="hook">Then plan your four weeks.</p>
+    </section>
+
+    <section class="part" data-title="Plan four weeks">
+      <h2>Plan four weeks</h2>
+      <p class="say">Give yourself four weeks, about 10 hours a week. That's the same shape as a real first engagement, just smaller.</p>
+      <p class="say">Most people spend too long building and too little testing. The plan below protects testing time.</p>
+
+      <div class="activity">
+        <div class="do">Step through the four weeks</div>
+        <ol class="day" id="weeks">
+          <li><span class="t">week 1</span><span>Discovery: read the brief, list questions, make the data, write the scope doc.</span></li>
+          <li><span class="t">week 2</span><span>Build the smallest version that works from start to finish.</span></li>
+          <li><span class="t">week 3</span><span>Eval set, guardrails, and fixing what the evals find.</span></li>
+          <li><span class="t">week 4</span><span>Run it on a test group, measure the metric, record the demo, write it up.</span></li>
+        </ol>
+      </div>
+      <p class="hook">Check your time budget.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice 11.1">
+      <h2>✏️ Practice 11.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <b class="eqbox">hours = weeks × hours per week</b><br>
+        <b class="eqbox">part = share × total</b>
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="40" data-hint="Multiply the weeks by the hours each week." data-work="4 × 10 = 40 hours.">
+          <div class="ask">1. Four weeks at 10 hours a week. How many hours do you have?</div>
+        </div>
+        <div class="prob" data-answer="10" data-hint="Week 3 is one of four equal weeks." data-work="40 ÷ 4 = 10 hours for evals and guardrails.">
+          <div class="ask">2. If every week gets the same time, how many hours go to evals and guardrails?</div>
+        </div>
+        <div class="prob" data-answer="27" data-hint="Find 90% of 30." data-work="0.9 × 30 = 27 cases.">
+          <div class="ask">3. Your eval set has 30 cases and your bar is 90%. How many must pass?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What you hand in">
+      <h2>What you hand in</h2>
+      <p class="say">Recruiters and interviewers skim. Make each piece easy to find from one place: a GitHub repo whose README links to everything.</p>
+      <p class="say">Tick each one off as you finish it.</p>
+
+      <div class="activity">
+        <div class="do">Your capstone checklist</div>
+        <div id="hand"></div>
+        <div class="count" id="handCount"></div>
+      </div>
+      <p class="hook">How is it judged?</p>
+    </section>
+
+    <section class="part" data-title="How it's judged">
+      <h2>How it's judged</h2>
+      <p class="say">Your capstone is judged the way a client and an interviewer would judge it: did you find the real problem, did you prove it works, and can you explain it?</p>
+      <div class="tablewrap"><table class="mini">
+        <tr><th>Part</th><th>Strong</th></tr>
+        <tr><td>Problem</td><td>One clear problem, backed by data, with a metric and baseline</td></tr>
+        <tr><td>Build</td><td>Small, works start to finish, readable code</td></tr>
+        <tr><td>Proof</td><td>An eval set with results, and guardrails for the risky cases</td></tr>
+        <tr><td>Result</td><td>The metric before and after</td></tr>
+        <tr><td>Story</td><td>A short write-up and demo a stranger understands</td></tr>
+      </table></div>
+
+      <div class="activity">
+        <div class="do">Which capstone would you hire from?</div>
+        <div class="people" id="judge">
+          <button class="person" type="button" data-why="Polish without proof. Nobody knows if it gives right answers."><b>A beautiful app with no tests</b></button>
+          <button class="person" type="button" data-why="Four half-working parts show you can start things, not finish them."><b>Four features, each half working</b></button>
+          <button class="person" type="button" data-right="Yes. Small, tested and measured. That's exactly the FDE job."><b>One small feature, 30 evals, and a before-and-after number</b></button>
+        </div>
+        <div class="say-why" id="judgeWhy">Tap a capstone.</div>
+      </div>
+      <p class="hook">Last step: show it.</p>
+    </section>
+
+    <section class="part" data-title="Present it">
+      <h2>Present it</h2>
+      <p class="say">Record a demo video of about three minutes. Most people who look at your project will watch this, and nothing else.</p>
+      <p class="say">Use the same shape as a client demo: the problem, their data, it working, the number, and what you'd do next.</p>
+
+      <div class="activity">
+        <div class="do">Put the video in order</div>
+        <div id="video"></div>
+      </div>
+      <p class="hook">A quick check before you start.</p>
+    </section>
+
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Four questions about running your own engagement.</p>
+      <div class="test" data-test="11">
+        <div class="quiz" data-page="lesson11.html#2" data-topic="make realistic data" data-right="Yes. Realistic but invented, with the mess planted on purpose.">
+          <div class="q"><small>Question 1</small>You're building a job matcher, and have no real resumes. What do you use?</div>
+          <div class="options">
+            <button data-why="Real people's details must never be used without permission.">Resumes found online</button>
+            <button data-right>Synthetic resumes, with realistic mess planted in</button>
+            <button data-why="Perfectly clean data hides the problems a real client would have.">A few perfectly clean resumes</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson11.html#3" data-topic="plan four weeks" data-right="Yes. Testing time is what most projects squeeze, so protect it.">
+          <div class="q"><small>Question 2</small>It's week 3 and your build isn't finished. What do you do?</div>
+          <div class="options">
+            <button data-why="Untested features are worth less than a tested small one.">Keep building and skip the evals</button>
+            <button data-right>Cut the build to what works, and start the evals</button>
+            <button data-why="A longer project risks never finishing.">Add two more weeks of building</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson11.html#6" data-topic="how it's judged" data-right="Yes. The number before and after proves the work mattered.">
+          <div class="q"><small>Question 3</small>What makes a capstone write-up most convincing?</div>
+          <div class="options">
+            <button data-why="Length doesn't prove anything.">A long list of the tools you used</button>
+            <button data-right>The metric before and after, with how you measured it</button>
+            <button data-why="Screenshots show it exists, not that it works.">Lots of screenshots</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson11.html#7" data-topic="present it" data-right="Yes. Problem first, so viewers know why the rest matters.">
+          <div class="q"><small>Question 4</small>What should the first 20 seconds of your demo video show?</div>
+          <div class="options">
+            <button data-right>The problem, in the client's words</button>
+            <button data-why="Code means little before people know the problem.">Your code</button>
+            <button data-why="Thanks belong at the end, if at all.">Thanks and an introduction</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">How do you turn this into a job offer?</div>
+        <div><a href="lesson12.html">Lesson 12 answers it.</a></div>
+      </div>
+      <p><button class="done-toggle" data-done="11">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+picker("tracks", "tracksWhy");
+
+orderer("synth", {
+  steps: ["Write down what the real data would look like: fields and formats", "Write 10 to 20 examples by hand", "Ask a model for many more in the same style", "Plant the mess: duplicates, typos, two versions that disagree", "Check that no real names, numbers or emails slipped in"],
+  done: "Realistic, messy, and safe. Note the planted problems: your evals should catch them.",
+});
+
+stepper("weeks", { after: (i, n) => i === n - 1 ? "Building gets one week of four. Testing and measuring get as much." : "" });
+practice("prac1");
+
+(function () {
+  const root = document.getElementById("hand"), count = document.getElementById("handCount");
+  const items = ["Scope doc: problem, metric with baseline, first version, what it won't do", "Code on GitHub, with a README that links to everything", "Eval set and its latest results", "Guardrails for the risky cases", "The metric before and after", "A 3-minute demo video", "A one-page write-up: problem, what you did, result, what you learned"];
+  function build() {
+    root.innerHTML = items.map((t, i) => `<label class="switch"><input type="checkbox" data-i="${i}"> <span>${t}</span></label>`).join("");
+    const boxes = [...root.querySelectorAll("input")];
+    const upd = () => { const n = boxes.filter(b => b.checked).length; count.textContent = n === items.length ? "All done. That's a portfolio project." : `${n} of ${items.length} done`; };
+    boxes.forEach(b => b.onchange = upd); upd();
+  }
+  build(); addReset(root, build);
+})();
+
+picker("judge", "judgeWhy");
+
+orderer("video", {
+  steps: ["The problem, in the client's words (20 seconds)", "Their messy data, and what you found in it (20 seconds)", "It working on a real case (90 seconds)", "The number, before and after (20 seconds)", "What you'd do next (30 seconds)"],
+  done: "Three minutes, with the same shape as a client demo.",
+});
+</script>
+</body>
+</html>
