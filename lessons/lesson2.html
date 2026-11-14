@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Discovery</title>
+<meta name="description" content="Lesson 2 of Forward Deployed Engineering: turn a vague brief into one clear problem, with a number to prove it's solved.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 2 of 12</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Discovery</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+
+    <!-- 1 -->
+    <section class="part" data-title="Vague words hide questions">
+      <h2>Vague words hide questions</h2>
+      <p class="say">An FDE's first week with a client is called <mark>discovery</mark>: finding the real problem before building anything.</p>
+      <p class="say">It starts with the brief. A phrase like "things feel chaotic" sounds clear, but you can't build anything from it. It hides a question.</p>
+      <p class="say">Turn each vague phrase into a question whose answer is a number or an example.</p>
+
+      <div class="activity">
+        <div class="do">Tap every vague phrase in Priya's brief</div>
+        <div class="mail" id="brief">
+          <p>We keep hearing that <button class="vague" type="button" data-q="Help with what, exactly? What would change?">AI can help</button> institutes like ours. We're <button class="vague" type="button" data-q="How fast? How many more students than last year?">growing fast</button>, and honestly <button class="vague" type="button" data-q="What goes wrong most often? Can you show me one example?">things feel chaotic</button>. <button class="vague" type="button" data-q="How many messages does each counsellor answer a day?">Our counsellors are drowning</button>, students <button class="vague" type="button" data-q="How long do people wait now, and how long is OK?">wait too long</button> for answers, and we're <button class="vague" type="button" data-q="Out of 100 people who enquire, how many join?">not sure we're converting</button> the people who enquire. Mentors and reviewers are <button class="vague" type="button" data-q="Which tasks take mentors and reviewers the most time?">stretched</button> too.</p>
+          <p>Can you come in for a week, figure out where AI would actually help, and build <button class="vague" type="button" data-q="Who will use it, and what does 'working' look like?">something we can use</button>?</p>
+        </div>
+        <ul class="qlist" id="qlist"></ul>
+        <div class="count" id="qcount"></div>
+      </div>
+      <p class="hook">Who do you ask these questions?</p>
+    </section>
+
+    <!-- 2 -->
+    <section class="part" data-title="Who's who">
+      <h2>Who's who</h2>
+      <p class="say">Everyone the project affects, or who has a say in it, is a <mark>stakeholder</mark>.</p>
+      <p class="say">The one who asked for the work and decides whether it succeeded is the <mark>sponsor</mark>. Here, that's Priya.</p>
+      <p class="say">The sponsor isn't the only one who matters. Someone who never asked for the project can still stop it.</p>
+
+      <div class="activity">
+        <div class="do">Who could stop this project, even though they didn't ask for it?</div>
+        <div class="people" id="people">
+          <button class="person" type="button" data-why="Priya asked for the project. She wants it to work."><small>Director of Operations · sponsor</small><b>Priya</b><span>Growing without hiring many more staff</span></button>
+          <button class="person" type="button" data-why="Arjun wants this badly: his team is judged on it."><small>Head of Admissions</small><b>Arjun</b><span>More counselling calls booked</span></button>
+          <button class="person" type="button" data-why="Divya would be glad of help. She can't stop the project."><small>Senior Counsellor</small><b>Divya</b><span>Answering the same questions all day</span></button>
+          <button class="person" type="button" data-why="Rahul would welcome help, and has no say over the systems."><small>Lead Mentor</small><b>Rahul</b><span>Students stuck on basics</span></button>
+          <button class="person" type="button" data-why="Sana cares about job matching. She has no say over admissions."><small>Placement Manager</small><b>Sana</b><span>Matching students to jobs faster</span></button>
+          <button class="person" type="button" data-right="Yes. Kevin controls the systems and the student data. If he says no to letting an AI see phone numbers, nothing ships. Talk to him early."><small>IT Lead, a team of one</small><b>Kevin</b><span>Security, cost, and not breaking anything</span></button>
+        </div>
+        <div class="say-why" id="peopleWhy">Tap a person.</div>
+      </div>
+      <p class="hook">What do you ask them?</p>
+    </section>
+
+    <!-- 3 -->
+    <section class="part" data-title="Ask questions that open up">
+      <h2>Ask questions that open up</h2>
+      <p class="say">An interview only helps if people tell you what really happens.</p>
+      <p class="say">A question that opens up asks them to describe or show: "Walk me through what happens when a message comes in at night."</p>
+      <p class="say">A <mark>leading question</mark> hands them your answer to agree with: "Wouldn't a chatbot fix this?" People are polite, so they say yes, and you learn nothing.</p>
+
+      <div class="activity">
+        <div class="do">Sort the questions</div>
+        <div id="qsort"></div>
+      </div>
+      <p class="hook">Here's what the interviews told you.</p>
+    </section>
+
+    <!-- 4 -->
+    <section class="part" data-title="What people told you">
+      <h2>What people told you</h2>
+      <p class="say">You ran the interviews. Below are six things people said.</p>
+      <p class="say">Some words to know: a person who enquired and might join is a <mark>lead</mark>. Paying a fee in monthly parts is called <span data-peek="EMI stands for equated monthly instalment: the same amount every month until the fee is paid.">EMI</span>.</p>
+      <p class="say">Group what people said by the kind of pain it shows. Patterns tell you where AI could help most.</p>
+
+      <div class="activity">
+        <div class="do">Put each quote with its pain</div>
+        <div id="pains"></div>
+      </div>
+      <p class="hook">But are those stories true?</p>
+    </section>
+
+    <!-- 5 -->
+    <section class="part" data-title="Check what people say">
+      <h2>Check what people say</h2>
+      <p class="say">People remember what stands out, so a story can be bigger than the facts.</p>
+      <p class="say">Arjun said: "Half the messages come at night." Before you build on that, check it in the data.</p>
+      <p class="say">Here are the times of 20 first messages from Northstar's WhatsApp, on one line from midnight to midnight. Count the ones between 9 pm and 8 am.</p>
+
+      <div class="activity">
+        <div class="do">Is Arjun right?</div>
+        <div class="clock" id="clock"></div>
+        <div class="btnrow" id="clockBtns"></div>
+        <p class="say-why" id="clockSay">Each dot is one first message.</p>
+      </div>
+      <p class="hook">Your turn to check some data.</p>
+    </section>
+
+    <!-- 6 practice -->
+    <section class="part" data-nonum data-title="✏️ Practice 2.1">
+      <h2>✏️ Practice 2.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        Same person? Compare only the digits of the phone number, without a leading 0 or +91.<br>
+        <b class="eqbox">share = count ÷ total × 100%</b>
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="2" data-hint="Go down the courses one by one and compare the two fees." data-work="Full Stack: ₹1,35,000 and ₹1,45,000, different.<br>Digital Marketing: ₹1,10,000 and ₹1,20,000, different.<br>The other four match. So 2 courses differ.">
+          <div class="ask">1. Northstar has two fee sheets. How many courses have different fees in them?</div>
+          <div class="twocol">
+            <div><p class="cap">fees_v2_final (October)</p>
+              <table class="mini"><tr><td>Full Stack</td><td class="n">1,35,000</td></tr><tr><td>Python &amp; AI</td><td class="n">1,65,000</td></tr><tr><td>Mobile App</td><td class="n">1,40,000</td></tr><tr><td>Graphic Design</td><td class="n">1,15,000</td></tr><tr><td>Video Editing</td><td class="n">1,25,000</td></tr><tr><td>Digital Marketing</td><td class="n">1,10,000</td></tr></table></div>
+            <div><p class="cap">Fee list (shared, February)</p>
+              <table class="mini"><tr><td>Full stack</td><td class="n">1,45,000</td></tr><tr><td>Python + AI</td><td class="n">1,65,000</td></tr><tr><td>Flutter app dev</td><td class="n">1,40,000</td></tr><tr><td>Graphic design</td><td class="n">1,15,000</td></tr><tr><td>Video editing</td><td class="n">1,25,000</td></tr><tr><td>Digital mktg</td><td class="n">1,20,000</td></tr></table></div>
+          </div>
+        </div>
+        <div class="prob" data-answer="3" data-hint="Write each number as digits only, then count the different ones." data-work="As digits only: 9999901234, 9999901234, 9999901236, 9999901236, 9999901237, 9999901234.<br>Three different numbers, so 3 people.">
+          <div class="ask">2. Six rows from the lead tracker. How many different people are there?</div>
+          <table class="mini"><tr><th>Name</th><th>Phone</th></tr><tr><td>Arun K</td><td>+91 99999 01234</td></tr><tr><td>Arun Krishnan</td><td>9999901234</td></tr><tr><td>Fathima</td><td>099999 01236</td></tr><tr><td>Fathima N</td><td>99999 01236</td></tr><tr><td>Rahul M</td><td>+91 9999901237</td></tr><tr><td>Arun K</td><td>+91-99999-01234</td></tr></table>
+        </div>
+        <div class="prob" data-answer="50" data-hint="Night is 9 pm (21:00) to 8 am. Count those, then use the share rule." data-work="Night: 23:42, 21:15, 07:30, 22:10. That's 4 of 8.<br>4 ÷ 8 × 100% = 50%.">
+          <div class="ask">3. Eight first messages arrived at 23:42, 14:10, 21:15, 11:20, 07:30, 19:02, 22:10 and 16:00. What share came at night, between 9 pm and 8 am? (in %)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7 -->
+    <section class="part" data-title="From chaos to a problem tree">
+      <h2>From chaos to a problem tree</h2>
+      <p class="say">You now have many pains. To see which to fix, break the big goal into smaller pieces.</p>
+      <p class="say">Put Priya's goal at the top. Under it, the causes the interviews and data showed. Under each cause, something you could build.</p>
+      <p class="say">Breaking a fuzzy goal down until you reach things you could build is called <mark>decomposing</mark> the problem. It's also a classic FDE interview question.</p>
+
+      <div class="activity">
+        <div class="do">Tap each cause to see what could fix it</div>
+        <div class="tree" id="tree">
+          <div class="goal">Grow without hiring many more staff</div>
+          <div class="arrow">↓ because…</div>
+          <div class="row3">
+            <button class="cause" type="button" data-fix="An admissions agent that replies in minutes, day or night">Night enquiries wait until morning</button>
+            <button class="cause" type="button" data-fix="The same admissions agent answers the common questions">Counsellors repeat the same answers</button>
+            <button class="cause" type="button" data-fix="One trusted fee sheet that the agent reads">Fees get quoted from an old sheet</button>
+            <button class="cause" type="button" data-fix="A mentor helper that answers from the course docs">Students wait for mentors on basics</button>
+            <button class="cause" type="button" data-fix="A review helper and a job matcher">Code reviews and job matching take days</button>
+          </div>
+        </div>
+        <div class="count" id="treeCount"></div>
+      </div>
+      <p class="hook">Several fixes. Which first?</p>
+    </section>
+
+    <!-- 8 -->
+    <section class="part" data-title="Score the options">
+      <h2>Score the options</h2>
+      <p class="say">The tree points to four things you could build. Mark each one from 1 to 5 on: <b>value</b> to Northstar, how ready the <b>data</b> is, the <b>effort</b> to build it, and the <b>risk</b> if it goes wrong.</p>
+      <p class="say">Value and ready data are good, so they add. Effort and risk are costs, so they take away:<br>
+      <b class="eqbox">score = value + data − effort − risk</b></p>
+      <p class="say">For the admissions agent: 5 + 4 − 3 − 2 = 4.</p>
+
+      <div class="activity">
+        <div class="do">Change any mark you disagree with</div>
+        <div class="tablewrap"><table class="score" id="score"></table></div>
+        <p class="say-why" id="scoreSay"></p>
+      </div>
+      <p class="hook">How will you know it worked?</p>
+    </section>
+
+    <!-- 9 -->
+    <section class="part" data-title="Pick the number that proves it">
+      <h2>Pick the number that proves it</h2>
+      <p class="say">The number that shows whether a project worked is its <mark>success metric</mark>.</p>
+      <p class="say">A good one passes three checks: you can measure it today, the sponsor cares about it, and what you build can change it directly.</p>
+      <p class="say">Careful: Arjun's team is judged on calls booked, but Priya cares about students who join. They're not the same.</p>
+
+      <div class="activity">
+        <div class="do">Which metric would you pick for the admissions agent?</div>
+        <div class="people" id="metrics">
+          <button class="person" type="button" data-why="Easy to measure, and Arjun cares. But a booked call isn't a student who joins, so it can look good while Priya's goal doesn't move."><b>Calls booked a month</b></button>
+          <button class="person" type="button" data-why="This is what Priya cares about most. But fees, timing and many other things change it too, and it moves slowly. Keep it as the long-term check."><b>Students who join a month</b></button>
+          <button class="person" type="button" data-right="Yes. You can measure it in today's chats, it's why leads go cold, and the agent changes it directly. Watch joins too, as the long-term check."><b>Minutes until a night enquiry gets its first reply</b></button>
+          <button class="person" type="button" data-why="That counts how busy the agent is, not whether it helped anyone."><b>Messages the AI sends a month</b></button>
+        </div>
+        <div class="say-why" id="metricWhy">Tap a metric.</div>
+      </div>
+      <p class="hook">Now practise scoring and measuring.</p>
+    </section>
+
+    <!-- 10 practice -->
+    <section class="part" data-nonum data-title="✏️ Practice 2.2">
+      <h2>✏️ Practice 2.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        <b class="eqbox">score = value + data − effort − risk</b><br>
+        The <b>median</b> is the middle value once the values are in order. It isn't pulled up by one very slow case.
+      </div>
+      <div class="activity" id="prac2">
+        <div class="prob" data-answer="5" data-hint="Add value and data, then take away effort and risk." data-work="2 + 5 − 1 − 1 = 5.">
+          <div class="ask">1. A new idea: a bot that reminds students when an EMI payment is due. Value 2, data 5, effort 1, risk 1. What's its score?</div>
+        </div>
+        <div class="prob" data-answer="620" data-hint="Put the five times in order and take the middle one." data-work="In order: 480, 540, 620, 690, 720.<br>The middle (third) one is 620 minutes, about 10 hours.">
+          <div class="ask">2. Five night enquiries waited 620, 540, 690, 480 and 720 minutes for a first reply. What's the median wait, in minutes?</div>
+        </div>
+        <div class="prob" data-answer="124" data-hint="Divide today's median wait by the target." data-work="620 ÷ 5 = 124 times faster.">
+          <div class="ask">3. The target is a first reply within 5 minutes. How many times faster than a 620-minute wait is that?</div>
+        </div>
+      </div>
+      <p class="muted-note">Today's value of a metric, like the 620 minutes, is called the <b>baseline</b>. You measure it before you build, so you can show the change after.</p>
+    </section>
+
+    <!-- 11 -->
+    <section class="part" data-title="Write the scope doc">
+      <h2>Write the scope doc</h2>
+      <p class="say">Everything you found goes on one page: the problem, who it's for, the success metric, what the first version does and doesn't do, and the data it uses.</p>
+      <p class="say">That page is a <mark>scope doc</mark>. The client agrees to it before you build, so nobody is surprised later.</p>
+      <p class="say">The hardest part is saying what you <b>won't</b> do.</p>
+
+      <div class="activity">
+        <div class="do">Pick the best line for each part, then check</div>
+        <div class="scope" id="scope"></div>
+        <div class="btnrow"><button class="primary" type="button" id="scopeCheck">Check my scope doc</button></div>
+        <p class="say-why" id="scopeSay"></p>
+      </div>
+      <p class="hook">Now convince the client.</p>
+    </section>
+
+    <!-- 12 -->
+    <section class="part" data-title="Pitch it to Priya">
+      <h2>Pitch it to Priya</h2>
+      <p class="say">You present the scope doc to Priya. A good sponsor pushes back, because it's her money and her team.</p>
+      <p class="say">Good answers are honest, short and use the numbers you found. Don't promise what you can't keep.</p>
+
+      <div class="activity">
+        <div class="do">Answer Priya's questions</div>
+        <div class="chat" id="chat"></div>
+        <p class="say-why" id="chatSay"></p>
+      </div>
+      <p class="hook">Let's check what stuck.</p>
+    </section>
+
+    <!-- 13 -->
+    <section class="part" data-title="Lesson test">
+      <h2>Lesson test</h2>
+      <p class="say">Six questions, all on new examples.</p>
+      <div class="test" data-test="2">
+        <div class="quiz" data-page="lesson2.html#1" data-topic="vague words hide questions" data-right="Yes. Its answer is a number you can measure, and it tells you what 'OK' means to them.">
+          <div class="q"><small>Question 1</small>A different client writes: "Our support replies are slow." Which follow-up question is most useful?</div>
+          <div class="options">
+            <button data-why="That's a leading question: it hands them a solution to agree with.">Would a chatbot help?</button>
+            <button data-right>How long do customers wait now, and how long is OK?</button>
+            <button data-why="Yes or no tells you almost nothing you can measure.">Is that a problem for you?</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson2.html#2" data-topic="who's who" data-right="Yes. They can stop the project, so involve them early and answer their worries.">
+          <div class="q"><small>Question 2</small>A company's head of security isn't interested in your project, but must approve access to the data. What should you do?</div>
+          <div class="options">
+            <button data-why="Leaving them out until the end is how projects get blocked at the last step.">Talk to them only once it's built</button>
+            <button data-right>Talk to them early, and plan around their worries</button>
+            <button data-why="The sponsor matters, but can't approve data access on the security lead's behalf.">Ask the sponsor to skip them</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson2.html#3" data-topic="ask questions that open up" data-right="Yes. It suggests the answer, so a polite person just agrees.">
+          <div class="q"><small>Question 3</small>Which of these is a leading question?</div>
+          <div class="options">
+            <button data-why="This asks them to describe what really happens: it opens up.">Walk me through your last busy Monday.</button>
+            <button data-right>You'd like faster replies, right?</button>
+            <button data-why="This asks for a fact, with no answer suggested.">What do counsellors copy and paste most?</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson2.html#5" data-topic="check what people say" data-right="Yes. 12 ÷ 40 × 100% = 30%, well short of most.">
+          <div class="q"><small>Question 4</small>A manager says "most enquiries come at weekends". In a sample of 40 enquiries, 12 came at weekends. Is the manager right?</div>
+          <div class="options">
+            <button data-why="Check the share: 12 of 40 is less than half.">Yes, 12 is a lot</button>
+            <button data-right>No, it's 30%</button>
+            <button data-why="12 ÷ 40 × 100% is 30%, not 12%.">No, it's 12%</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson2.html#8" data-topic="score the options" data-right="Yes. 4 + 2 − 2 − 1 = 3.">
+          <div class="q"><small>Question 5</small>An idea scores value 4, data 2, effort 2, risk 1. What's its score?</div>
+          <div class="options">
+            <button data-why="That adds all four marks. Effort and risk are costs, so they take away.">9</button>
+            <button data-right>3</button>
+            <button data-why="Check the order: value and data add, effort and risk take away.">1</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+        <div class="quiz" data-page="lesson2.html#9" data-topic="pick the number that proves it" data-right="Yes. It can be measured today, the sponsor cares about it, and the system changes it directly.">
+          <div class="q"><small>Question 6</small>You're building a bot that answers a shop's customer emails. Which is the best success metric?</div>
+          <div class="options">
+            <button data-why="That counts activity, not whether customers were helped.">Emails the bot sends a day</button>
+            <button data-right>Share of emails answered correctly within an hour</button>
+            <button data-why="Too vague to measure, and you can't show a baseline for it.">How modern the shop feels</button>
+          </div>
+          <div class="feedback"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 14 -->
+    <section class="part" data-title="What's next?">
+      <h2>What's next?</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">You've picked a problem. How do you work inside code you didn't write?</div>
+        <div>Lesson 3 answers it. Coming soon.</div>
+      </div>
+      <p><button class="done-toggle" data-done="2">Mark lesson as done</button></p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+// 1 · Vague phrases become questions
+(function () {
+  const brief = document.getElementById("brief"), list = document.getElementById("qlist"), count = document.getElementById("qcount");
+  const all = [...brief.querySelectorAll(".vague")];
+  function update() { const n = all.filter(b => b.classList.contains("found")).length; count.textContent = n === all.length ? `All ${n} found. Every one is now a question you can ask.` : `${n} of ${all.length} found`; }
+  all.forEach(b => b.onclick = () => {
+    if (b.classList.contains("found")) return;
+    b.classList.add("found");
+    const li = document.createElement("li"); li.innerHTML = `<b>"${esc(b.textContent)}" →</b> ${esc(b.dataset.q)}`; list.appendChild(li); update();
+  });
+  update();
+  addReset(brief, () => { all.forEach(b => b.classList.remove("found")); list.innerHTML = ""; update(); });
+})();
+
+// 2 · Who could stop it
+picker("people", "peopleWhy");
+
+// 3 · Questions that open up, or lead
+sorter("qsort", {
+  bins: [{ id: "open", label: "Opens up" }, { id: "lead", label: "Leads or closes" }],
+  items: [
+    { t: "Walk me through what happens when a message comes in at night.", bin: "open", why: "It asks them to describe what really happens." },
+    { t: "What do counsellors copy and paste most?", bin: "open", why: "It asks for a fact, with no answer suggested." },
+    { t: "Show me the last enquiry that went wrong.", bin: "open", why: "A real example beats a summary." },
+    { t: "Wouldn't a chatbot fix this?", bin: "lead", why: "It hands them your solution to agree with." },
+    { t: "You'd like faster replies, right?", bin: "lead", why: "It suggests the answer, so they just say yes." },
+    { t: "Is the fee sheet up to date?", bin: "lead", why: "A yes-or-no question closes the topic. Ask \"When was the fee sheet last changed, and by whom?\"" },
+  ],
+  done: "All sorted. Questions that open up get stories and numbers. The others get polite yeses.",
+});
+
+// 4 · Quotes grouped by pain
+sorter("pains", {
+  bins: [{ id: "slow", label: "Slow or missing replies" }, { id: "wrong", label: "Wrong or risky answers" }, { id: "same", label: "The same question again" }],
+  items: [
+    { t: "Arjun: \"Half the messages come at night. By morning the lead has gone cold.\"", bin: "slow", why: "Nobody answers until morning." },
+    { t: "Sana: \"I match resumes to job descriptions by hand. It takes days.\"", bin: "slow", why: "Students wait days for job matches." },
+    { t: "Arjun: \"Counsellors copy fees from a sheet that's often out of date.\"", bin: "wrong", why: "An old sheet means wrong fees." },
+    { t: "Kevin: \"Please, no promises about guaranteed jobs. We've had complaints.\"", bin: "wrong", why: "A promise like that is a risky answer." },
+    { t: "Divya: \"Eighty percent of questions are the same: fees, EMI, which campus.\"", bin: "same", why: "The same few questions, all day." },
+    { t: "Rahul: \"Students ask me how to install Node at 11 pm. The docs answer most of it.\"", bin: "same", why: "The answer already exists in the docs." },
+  ],
+  done: "Sorted. Most of the pain is around enquiries: slow replies, wrong fees and repeated questions.",
+});
+
+// 5 · Night messages on a 24-hour line
+(function () {
+  const clock = document.getElementById("clock"), btns = document.getElementById("clockBtns"), say = document.getElementById("clockSay");
+  const times = [0.5, 1.2, 6.8, 7.5, 9.5, 10.2, 11.3, 12.7, 13.1, 14.2, 15.5, 16.0, 17.4, 18.3, 19.0, 21.3, 22.2, 22.8, 23.1, 23.7];
+  const night = t => t >= 21 || t < 8;
+  const pct = h => (h / 24 * 100) + "%";
+  clock.innerHTML = `<div class="night" style="left:0;width:${pct(8)}" hidden></div><div class="night" style="left:${pct(21)};width:${pct(3)}" hidden></div>
+    <span class="nightlab" style="left:${pct(0.3)}" hidden>night</span><span class="nightlab" style="left:${pct(21.2)}" hidden>night</span>
+    <div class="bar"></div>` +
+    [0, 6, 12, 18, 24].map(h => `<span class="lab" style="left:${pct(h)}">${String(h % 24).padStart(2, "0")}:00</span>`).join("") +
+    times.map(t => `<span class="dot" style="left:${pct(t)}" data-peek="${String(Math.floor(t)).padStart(2, "0")}:${String(Math.round(t % 1 * 60)).padStart(2, "0")}"></span>`).join("");
+  const steps = [
+    () => "Each dot is one first message. Guess first: about half at night?",
+    () => "The blue bands are night: 9 pm to midnight, and midnight to 8 am.",
+    () => { const n = times.filter(night).length; return `Night messages: ${n} of ${times.length}.<br>${n} ÷ ${times.length} × 100% = ${n / times.length * 100}%.`; },
+    () => "45% is close to half. Arjun is roughly right, so slow night replies are a real problem.",
+  ];
+  let i = 0;
+  const back = document.createElement("button"); back.type = "button"; back.textContent = "← Back";
+  const next = document.createElement("button"); next.type = "button"; next.className = "primary"; next.textContent = "Next step →";
+  btns.append(back, next);
+  function show() {
+    clock.querySelectorAll(".night, .nightlab").forEach(x => x.hidden = i < 1);
+    clock.querySelectorAll(".dot").forEach((d, k) => d.classList.toggle("lit", i >= 2 && night(times[k])));
+    say.innerHTML = steps[i](); back.hidden = i === 0; next.hidden = i === steps.length - 1;
+  }
+  back.onclick = () => { i--; show(); }; next.onclick = () => { i++; show(); };
+  show(); addReset(clock, () => { i = 0; show(); });
+})();
+
+practice("prac1");
+
+// 7 · Problem tree
+(function () {
+  const tree = document.getElementById("tree"), count = document.getElementById("treeCount");
+  const causes = [...tree.querySelectorAll(".cause")];
+  function update() { const n = causes.filter(c => c.classList.contains("open")).length; count.textContent = n === causes.length ? "Two causes share one fix: the admissions agent. That's a hint for what to build first." : `${n} of ${causes.length} opened`; }
+  causes.forEach(c => c.onclick = () => {
+    if (c.classList.contains("open")) return;
+    c.classList.add("open"); const f = document.createElement("span"); f.className = "fix"; f.textContent = "→ " + c.dataset.fix; c.appendChild(f); update();
+  });
+  update();
+  addReset(tree, () => { causes.forEach(c => { c.classList.remove("open"); const f = c.querySelector(".fix"); if (f) f.remove(); }); update(); });
+})();
+
+// 8 · Scoring table
+(function () {
+  const table = document.getElementById("score"), say = document.getElementById("scoreSay");
+  const start = [
+    { name: "Admissions agent", v: 5, d: 4, e: 3, r: 2 },
+    { name: "Mentor helper", v: 3, d: 3, e: 2, r: 2 },
+    { name: "Review helper", v: 3, d: 2, e: 4, r: 2 },
+    { name: "Job matcher", v: 3, d: 2, e: 3, r: 3 },
+  ];
+  let rows;
+  const sel = (k, key) => `<select data-k="${k}" data-key="${key}" aria-label="${key}">${[1, 2, 3, 4, 5].map(n => `<option${rows[k][key] === n ? " selected" : ""}>${n}</option>`).join("")}</select>`;
+  function draw() {
+    const tot = r => r.v + r.d - r.e - r.r;
+    const best = Math.max(...rows.map(tot));
+    table.innerHTML = `<tr><th>Option</th><th>Value</th><th>Data</th><th>Effort</th><th>Risk</th><th>Score</th></tr>` +
+      rows.map((r, k) => `<tr class="${tot(r) === best ? "best" : ""}"><td>${r.name}</td><td>${sel(k, "v")}</td><td>${sel(k, "d")}</td><td>${sel(k, "e")}</td><td>${sel(k, "r")}</td><td class="tot">${tot(r)}</td></tr>`).join("");
+    const top = rows.filter(r => tot(r) === best).map(r => r.name);
+    say.innerHTML = top.length > 1 ? `A tie: ${top.join(" and ")}. Then pick the one the sponsor cares about most.` : `Highest score: ${top[0]}. The marks are your judgement, so be ready to explain each one.`;
+    say.className = "say-why good";
+    table.querySelectorAll("select").forEach(s => s.onchange = () => { rows[s.dataset.k][s.dataset.key] = +s.value; draw(); });
+  }
+  function reset() { rows = start.map(r => ({ ...r })); draw(); }
+  reset(); addReset(table, reset);
+})();
+
+// 9 · Which metric
+picker("metrics", "metricWhy");
+
+practice("prac2");
+
+// 11 · Scope doc
+(function () {
+  const root = document.getElementById("scope"), check = document.getElementById("scopeCheck"), say = document.getElementById("scopeSay");
+  const lines = [
+    { k: "Problem", opts: ["Things feel chaotic", "Night enquiries wait about 10 hours for a first reply, so leads go cold", "Northstar needs AI"], right: 1,
+      why: "A problem needs a fact you can check. The other two are the brief again." },
+    { k: "Users", opts: ["Everyone at Northstar", "Students already on a course", "People enquiring on WhatsApp, and the counsellors who take over"], right: 2,
+      why: "Name who actually uses it. \"Everyone\" means you haven't decided." },
+    { k: "Success metric", opts: ["A better experience for students", "First reply to night enquiries: from about 10 hours to under 5 minutes", "Send 1,000 AI messages a month"], right: 1,
+      why: "It needs a baseline and a target. Messages sent measure activity, not results." },
+    { k: "First version", opts: ["Answers fees, courses and campuses, and books counselling calls", "Handles enquiries, mentoring, reviews and job matching", "A slide deck about AI"], right: 0,
+      why: "Small enough to ship in weeks. Doing everything at once means nothing ships soon." },
+    { k: "Won't do", opts: ["Nothing: it does everything", "Won't answer fee questions", "Refunds, money worries and job promises go to a person"], right: 2,
+      why: "Say what goes to a human. Fees are the most common question, so leaving them out misses the point." },
+    { k: "Data", opts: ["Every student record, copied to the AI", "The current fee sheet, course pages and past chats, with phone numbers hidden", "Whatever the old shared sheet says"], right: 1,
+      why: "Use only what's needed, from the trusted source, and protect personal details for Kevin." },
+  ];
+  root.innerHTML = lines.map((l, i) => `<label class="line"><b>${l.k}</b><select data-i="${i}"><option value="">Choose…</option>${l.opts.map((o, j) => `<option value="${j}">${esc(o)}</option>`).join("")}</select></label>`).join("");
+  const sels = [...root.querySelectorAll("select")];
+  sels.forEach(s => s.onchange = () => { s.className = ""; });
+  check.onclick = () => {
+    let ok = 0, firstWrong = null;
+    sels.forEach((s, i) => {
+      if (s.value === "") { s.className = ""; if (firstWrong === null) firstWrong = { i, empty: true }; return; }
+      const right = +s.value === lines[i].right; s.className = right ? "ok" : "no";
+      if (right) ok++; else if (firstWrong === null) firstWrong = { i };
+    });
+    if (ok === lines.length) { say.className = "say-why good"; say.textContent = "That's a scope doc a client can say yes to: one problem, one number, a small first version and clear limits."; }
+    else if (firstWrong && firstWrong.empty) { say.className = "say-why"; say.textContent = `${ok} of ${lines.length} right so far. Choose a line for "${lines[firstWrong.i].k}" too.`; }
+    else { say.className = "say-why bad"; say.textContent = `${ok} of ${lines.length} right. ${lines[firstWrong.i].k}: ${lines[firstWrong.i].why}`; }
+  };
+  addReset(root, () => { sels.forEach(s => { s.value = ""; s.className = ""; }); say.textContent = ""; say.className = "say-why"; });
+})();
+
+// 12 · Pitch: Priya's questions
+(function () {
+  const chat = document.getElementById("chat"), say = document.getElementById("chatSay");
+  const turns = [
+    { q: "Why not build all four ideas at once?",
+      a: [["We can, it'll just take longer.", "Then nothing works for months, and you can't show any results."],
+          ["One working piece in four weeks beats four half-done ones. If it works, the next one is faster.", null],
+          ["The other three aren't important.", "They are important, just not first. Saying this upsets Rahul and Sana."]] },
+    { q: "What if the bot tells a parent the wrong fee?",
+      a: [["It won't make mistakes.", "Every system makes mistakes. Promising it won't is a promise you'll break."],
+          ["Parents can double-check on the website.", "That pushes the problem onto parents. A wrong fee hurts trust either way."],
+          ["It only quotes the one current fee sheet, and we test every fee answer before launch.", null]] },
+    { q: "How will I know it worked?",
+      a: [["Today night enquiries wait about 10 hours. In four weeks I'll show you that number, aiming for under 5 minutes.", null],
+          ["You'll feel the difference.", "A feeling can't be checked. Give her the number, from before and after."],
+          ["We'll count how many messages the bot sends.", "That shows the bot is busy, not that it helped."]] },
+  ];
+  let t = 0;
+  function bub(cls, html) { const d = document.createElement("div"); d.className = "bub " + cls; d.innerHTML = html; chat.appendChild(d); return d; }
+  function ask() {
+    if (t >= turns.length) { bub("them", "<small>Priya</small>Good. Let's do it."); say.className = "say-why good"; say.textContent = "Signed off. Honest, short and backed by numbers."; return; }
+    bub("them", `<small>Priya</small>${esc(turns[t].q)}`);
+    const box = document.createElement("div"); box.className = "replies";
+    turns[t].a.forEach(([text, bad]) => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = text;
+      b.onclick = () => {
+        if (bad) { say.className = "say-why bad"; say.textContent = bad + " Try another reply."; b.classList.add("no"); b.disabled = true; return; }
+        box.remove(); bub("you", `<small>You</small>${esc(text)}`); say.className = "say-why"; say.textContent = ""; t++; ask();
+      };
+      box.appendChild(b);
+    });
+    chat.appendChild(box);
+  }
+  function reset() { chat.innerHTML = ""; say.textContent = ""; say.className = "say-why"; t = 0; ask(); }
+  reset(); addReset(chat, reset);
+})();
+</script>
+</body>
+</html>
