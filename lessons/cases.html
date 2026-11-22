@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interview cases</title>
+<meta name="description" content="Ten forward deployed engineer interview cases, with what a strong answer covers, from the Forward Deployed Engineering course.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 12 extra</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Interview cases</h1>
+      <div class="progress" aria-label="Cases"></div>
+    </div>
+    <section class="part" data-title="How to practise">
+      <h2>How to practise</h2>
+      <p class="say">Ten cases like the ones in FDE interviews. Each is a vague request from a client.</p>
+      <p class="say">For each one: take 5 minutes, then say your answer out loud. Then open the cards and compare. There's no single right answer: interviewers grade how you get there.</p>
+      <p class="say">Better still, practise with a partner, or with an AI chatbot playing the client.</p>
+
+      <div class="activity">
+        <div class="do">A prompt for any AI chatbot</div>
+        <div class="mail" id="prompt">You are interviewing me for a forward deployed engineer role. Give me this case: [paste the case]. Play the client&#x27;s head of operations. Only share facts and numbers when I ask for them, and make them realistic. Push back once on my plan. When I say &quot;done&quot;, grade me on: clarifying questions, a clear problem and metric, a small first version, risks and guardrails, and how clearly I explained it. Then give me one thing to improve.</div>
+        <div class="btnrow"><button type="button" class="primary" id="copy">Copy the prompt</button><span class="muted-note" id="copied"></span></div>
+      </div>
+      <p class="hook">Start with a bank.</p>
+    </section>
+
+    <section class="part" data-title="A bank&#x27;s disputes team">
+      <h2>1. A bank&#x27;s disputes team</h2>
+      <p class="say">"A bank&#x27;s credit card disputes team gets 4,000 customer emails a week and takes 9 days to reply. They want AI. Where do you start?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case1">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="What kinds of disputes are most common? What happens to an email today, step by step? Where does the 9 days go: reading, checking transactions, or waiting on other teams? What must never go wrong?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="Sort and summarise each email: dispute type, card, amount, date, and the transaction it refers to, with a draft reply for an agent to approve. Start with the most common type only."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Days from email to first useful reply, with a baseline of 9. Also: share of drafts approved without edits."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Account data is sensitive: keep it inside the bank&#x27;s systems. Never let the AI promise a refund. A person approves every reply at first."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;Why not let it reply on its own?&quot; Because a wrong promise costs money and trust. Earn that step with weeks of shadow mode and a high approval rate."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: Where&#x27;s my order?.</p>
+    </section>
+
+    <section class="part" data-title="Where&#x27;s my order?">
+      <h2>2. Where&#x27;s my order?</h2>
+      <p class="say">"An online shop says 60% of its support tickets are &quot;where&#x27;s my order?&quot;. Their CTO wants an AI agent. What do you build?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case2">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="Where does order status live: their system, or each courier&#x27;s? How often is the status wrong or stale? What do customers do after they get an answer?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="An agent with one tool: look up the order and courier status, and reply in plain words. Anything else, like refunds or damage, goes to a person."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Share of order-status tickets closed with no person involved, and repeat contacts within 48 hours."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Check the customer owns the order before sharing anything. If courier data is stale, say so instead of guessing a date."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;What about the other 40%?&quot; Read a sample, group them, and pick the next biggest kind once this one is working."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: Drivers&#x27; delivery notes.</p>
+    </section>
+
+    <section class="part" data-title="Drivers&#x27; delivery notes">
+      <h2>3. Drivers&#x27; delivery notes</h2>
+      <p class="say">"A logistics company&#x27;s drivers write 20,000 short notes a day, in a mix of Hindi and English, like &quot;gate band, customer ne phone nahi uthaya&quot;. Managers want problems flagged. What would you do?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case3">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="Which problems matter most: failed deliveries, damage, safety? What do managers do today with the notes? How fast must a flag arrive to be useful?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="Label each note with a few fixed categories and an urgency, and send managers a short list of urgent ones every hour."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Share of failed deliveries re-attempted the same day. Check the labels against 200 notes that managers label by hand."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Mixed language and slang: test on real notes, not clean ones. Never auto-cancel an order from a note alone."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;Could a cheaper model do this?&quot; Probably, for most notes. Measure it on the same 200 labelled notes, then route."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: Car insurance claims.</p>
+    </section>
+
+    <section class="part" data-title="Car insurance claims">
+      <h2>4. Car insurance claims</h2>
+      <p class="say">"An insurer takes 12 days to settle simple car accident claims. Customers send photos and a form. They want AI to speed it up. Your approach?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case4">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="What makes a claim simple? Where do the 12 days go? Who decides the payout today, and with what rules? How common is fraud?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="Check each claim is complete on arrival, pull the facts from the form and photos, and ask the customer for anything missing straight away."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Days to settle simple claims, with a baseline of 12, and the share of claims complete on first try."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Don&#x27;t let AI decide payouts at first: an adjuster does. Watch for bias across regions and car types. Keep photos inside the insurer&#x27;s systems."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;Can it spot fraud?&quot; Maybe later, as a flag for a person, never an automatic rejection. Fraud needs much more data and care."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: Contract review at a law firm.</p>
+    </section>
+
+    <section class="part" data-title="Contract review at a law firm">
+      <h2>5. Contract review at a law firm</h2>
+      <p class="say">"A law firm&#x27;s lawyers spend hours checking vendor contracts for risky clauses. They want AI to review them. How do you start?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case5">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="Which clauses count as risky, and is there a written checklist? How many contracts a week? Who is responsible if something is missed?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="Find and quote each clause on the firm&#x27;s checklist, mark the ones that differ from their standard wording, and link every flag to the exact text."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Lawyer minutes per contract, and missed risky clauses on a test set of past contracts lawyers already reviewed."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Client confidentiality comes first: check where data goes. Always quote the source text, and make clear a lawyer signs off."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;What if it misses a clause?&quot; That&#x27;s why you measure misses on past contracts before launch, and keep the lawyer reviewing."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: Hospital discharge summaries.</p>
+    </section>
+
+    <section class="part" data-title="Hospital discharge summaries">
+      <h2>6. Hospital discharge summaries</h2>
+      <p class="say">"Doctors at a hospital spend 30 minutes writing each discharge summary. Management wants AI to write them. What do you do?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case6">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="What goes into a summary, and from which systems? What do doctors hate about writing them? Who reads them, and what goes wrong today?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="A draft summary from the patient&#x27;s records, in the hospital&#x27;s own template, with every fact linked to its source, for the doctor to edit and sign."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Doctor minutes per summary, and corrections per draft. Track any error that reaches a patient as a must-be-zero number."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Patient safety: never invent a dose or a diagnosis, and show where each fact came from. Health data rules apply."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;Can it skip the doctor?&quot; No. The doctor stays responsible. The win is a fast, correct first draft."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: Sales call research.</p>
+    </section>
+
+    <section class="part" data-title="Sales call research">
+      <h2>7. Sales call research</h2>
+      <p class="say">"A software company&#x27;s sales team spends an hour researching each company before a call. They want an AI assistant for it. Your plan?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case7">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="What does a good research note contain today? Which sources do they trust? How many calls a week? What does a bad note cost them?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="A one-page brief before each call, built from the CRM and a few trusted sources, with links for every claim."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Research minutes per call, and how often reps use the brief. Ask reps to rate 20 briefs."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Made-up facts about a customer are embarrassing: link every claim, and say &quot;not found&quot; instead of guessing."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;Can it write the follow-up email too?&quot; Good next step, once the brief is trusted. Same sources, same rules."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: Machine breakdowns.</p>
+    </section>
+
+    <section class="part" data-title="Machine breakdowns">
+      <h2>8. Machine breakdowns</h2>
+      <p class="say">"A factory wants to use AI to predict machine breakdowns from its maintenance logs. They&#x27;ve heard language models can do it. What do you say?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case8">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="What data exists: sensor readings, or only written logs? How many breakdowns a year? What does one cost? What do engineers do when they suspect trouble?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="Maybe not a language model at all. If there are sensor readings, a simple prediction model may fit better. A language model could help search old logs for similar failures."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Unplanned downtime hours per month, and how many breakdowns were warned about in advance."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Too many false alarms and engineers stop listening. Too few breakdowns in the data, and nothing can be learned yet."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;So no AI?&quot; The right tool for the problem. Saying so honestly builds more trust than forcing a language model in."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: Government schemes.</p>
+    </section>
+
+    <section class="part" data-title="Government schemes">
+      <h2>9. Government schemes</h2>
+      <p class="say">"A state government wants a WhatsApp assistant that helps citizens find which welfare schemes they&#x27;re eligible for. How do you approach it?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case9">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="How many schemes, and are the rules written down clearly? Which languages? How do people apply today, and where do they get stuck?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="Ask a few simple questions, check the official rules for the top 10 schemes, and explain the result in the citizen&#x27;s language, with the documents needed."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Share of users who start an application, and wrong eligibility answers on a test set checked by officials."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="A wrong &quot;you&#x27;re not eligible&quot; can cost a family real help: when unsure, point to an office. Collect as little personal data as possible."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;Can it cover all 200 schemes?&quot; Later. Get the top 10 right and measured first, then grow."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">Next: &quot;A chatbot like ChatGPT&quot;.</p>
+    </section>
+
+    <section class="part" data-title="&quot;A chatbot like ChatGPT&quot;">
+      <h2>10. &quot;A chatbot like ChatGPT&quot;</h2>
+      <p class="say">"A property developer says: &quot;We want a chatbot like ChatGPT on our website.&quot; That&#x27;s the whole brief. What do you do?"</p>
+      <p class="say">Take 5 minutes. Say your answer out loud. Then open the cards.</p>
+
+      <div class="activity">
+        <div class="do">What a strong answer covers</div>
+        <div class="tree cards" id="case10">
+          <div class="row3">
+            <button class="cause" type="button" data-fix="Why now: what problem made them ask? What do website visitors want? What happens to an enquiry today? What would success look like in three months?"><b>Questions to ask first</b></button>
+            <button class="cause" type="button" data-fix="Depends on the answers. Often: answer questions about projects, prices and visits from approved documents, and book site visits."><b>A strong first version</b></button>
+            <button class="cause" type="button" data-fix="Site visits booked from the website, and time to first reply on enquiries."><b>The metric</b></button>
+            <button class="cause" type="button" data-fix="Prices and possession dates must come from approved documents only. Never promise discounts or dates."><b>Risks and guardrails</b></button>
+            <button class="cause" type="button" data-fix="&quot;So you won&#x27;t just build it?&quot; You will, but the right thing. Ten minutes of questions saves months of building the wrong chatbot."><b>The follow-up they&#x27;ll ask</b></button>
+          </div>
+        </div>
+      </div>
+      <p class="hook">That&#x27;s all ten. Try them again in a week.</p>
+    </section>
+
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between cases">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+document.querySelectorAll(".cards").forEach(tree => {
+  const causes = [...tree.querySelectorAll(".cause")];
+  causes.forEach(c => c.onclick = () => {
+    if (c.classList.contains("open")) return;
+    c.classList.add("open"); const f = document.createElement("span"); f.className = "fix"; f.textContent = c.dataset.fix; c.appendChild(f);
+  });
+  addReset(tree, () => causes.forEach(c => { c.classList.remove("open"); const f = c.querySelector(".fix"); if (f) f.remove(); }));
+});
+document.getElementById("copy").onclick = async () => {
+  const msg = document.getElementById("copied");
+  try { await navigator.clipboard.writeText(document.getElementById("prompt").textContent); msg.textContent = "Copied. Paste it into any chatbot, with a case."; }
+  catch (e) { msg.textContent = "Select the text above and copy it."; }
+};
+</script>
+</body>
+</html>

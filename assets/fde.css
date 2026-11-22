@@ -180,3 +180,9 @@
 .plane .pt.near { background: var(--hl-green); color: var(--on-hl); }
 .plane .pt.dim { opacity: .45; }
 @media (max-width: 560px) { .plane { height: 300px; } .plane .pt { font-size: 0.7rem; } }
+
+/* Interview case cards: full width, plain text */
+.tree.cards { grid-template-columns: 1fr; }
+.cards .row3 { grid-template-columns: 1fr; gap: 6px; }
+.cards .cause { padding: 6px 12px; width: 100%; }
+.cards .cause .fix { font-family: var(--body); font-size: 0.92rem; color: var(--ink); line-height: 1.45; }

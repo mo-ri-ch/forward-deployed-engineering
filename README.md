@@ -34,7 +34,7 @@ Hands-on Colab notebooks build the Northstar admissions agent step by step, on r
 | [Lesson 8](notebooks/lesson8.ipynb) | Key scanning, masking personal data, routing to cut cost, a logged webhook, shadow mode, rollout modes |
 | [Lesson 9](notebooks/lesson9.ipynb) | Tag a week of failures, fix the worst first, turn failures into tests, triage, the monthly update |
 
-For interviews: [coding round practice](notebooks/coding-round.ipynb), eight timed exercises with checks ([model answers](notebooks/coding-round-solutions.ipynb)).
+For interviews: ten [interview cases](https://gradlabs.in/learn/fde/lessons/cases.html) with what a strong answer covers, and [coding round practice](notebooks/coding-round.ipynb), eight timed exercises with checks ([model answers](notebooks/coding-round-solutions.ipynb)).
 
 Starter code lives in [`starter/`](starter/). The notebooks are built from `tools/make_notebooks.py`; the first-week log from `tools/make_live_week.py`.
 
