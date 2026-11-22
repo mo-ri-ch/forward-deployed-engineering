@@ -203,6 +203,83 @@ LESSONS = {
                    "or download it and add it to your portfolio repo. Next lesson, the agent answers from Northstar's course pages."),
         ],
     },
+    5: {
+        "title": "Answers from client documents",
+        "cells": [
+            ("md", "Make the agent answer from Northstar's own course pages and policies: cut them into chunks, turn the chunks into embeddings, "
+                   "find the best matches for each question, and answer only from those.\n\n"
+                   "For each cell: **guess what it will print first**, then press ▶ and check."),
+            ("md", "**1. Get the code.** The second cell installs the small embeddings model's library (Colab usually has it already)."),
+            ("code", SETUP_AGENT),
+            ("code", "!pip install -q sentence-transformers"),
+            ("md", "**2. Choose a model** for writing answers. `\"replay\"` needs no key. The embeddings model is separate: it's free and runs inside Colab."),
+            ("code", CHOOSE),
+            ("md", "**3. Read Northstar's documents.** Course pages and policies, each with an owner, a date and a status.\n\n"
+                   "🤔 *One of these shouldn't be trusted. Which?*"),
+            ("code", 'import northstar\n\ndocs = northstar.load_docs()\nfor d in docs:\n'
+                     '    print(f\'{d["file"]:22} {d["status"]:8} updated {d["updated"]}   {len(d["text"].split())} words\')'),
+            ("md", "**4. Cut them into chunks.** 50 words each, with 10 words of overlap. Every chunk starts with its page title, "
+                   "so a chunk like \"The last 2 months are an internship\" still says which course it's about."),
+            ("code", 'import math\n\n\ndef chunk(doc, size=50, overlap=10):\n    words = doc["text"].split()\n    pieces = []\n'
+                     '    for start in range(0, max(len(words) - overlap, 1), size - overlap):\n'
+                     '        piece = " ".join(words[start:start + size])\n'
+                     '        pieces.append({"file": doc["file"], "status": doc["status"], "text": f\'{doc["title"]}: {piece}\'})\n'
+                     '    return pieces\n\n\nchunks = [c for d in docs for c in chunk(d)]\nprint(len(chunks), "chunks\\n")\nprint(chunks[0]["text"])'),
+            ("md", "🤔 *The Full Stack page: how many chunks does the formula from the lesson predict? Work it out, then run the cell.*"),
+            ("code", 'page = next(d for d in docs if d["file"] == "full-stack.md")\nn = len(page["text"].split())\n'
+                     'print(n, "words →", len(chunk(page)), "chunks")\nprint("Formula: (words − o) ÷ (c − o), rounded up =", math.ceil((n - 10) / (50 - 10)))'),
+            ("md", "**5. Turn every chunk into an embedding.** One row of numbers per chunk."),
+            ("code", 'import embeddings\n\nvectors = embeddings.embed([c["text"] for c in chunks])\nprint(vectors.shape, "← (chunks, numbers per chunk)")\nprint(vectors[0][:8].round(3))'),
+            ("md", "**6. Search.** Score every chunk against the question (multiply pair by pair and add up), and keep the top 3.\n\n"
+                   "🤔 *For \"hostel for girls?\", look at the top score compared with the other two questions.*"),
+            ("code", 'import numpy as np\n\n\ndef search(question, k=3, keep=lambda c: True):\n    q = embeddings.embed([question])[0]\n'
+                     '    scores = vectors @ q\n    order = [i for i in np.argsort(-scores) if keep(chunks[i])][:k]\n'
+                     '    return [(float(scores[i]), chunks[i]) for i in order]\n\n\n'
+                     'for question in ["mern course fees?", "can i pay monthly?", "hostel for girls?"]:\n    print("\\n" + question)\n'
+                     '    for score, c in search(question):\n        print(f"  {score:.3f}  {c[\'file\']:20} {c[\'text\'][:60]}…")'),
+            ("md", "Nothing is about hostels, so the closest chunk isn't an answer at all. Nearest isn't the same as relevant."),
+            ("md", "**7. Check the score by hand.** 🤔 *Work out 0.6 × 0.8 + 0.8 × 0.6 on paper, then run it.*"),
+            ("code", 'a = np.array([0.6, 0.8])\nb = np.array([0.8, 0.6])\nprint(a @ b)'),
+            ("md", "**8. Answer only from what was found.** The rules say: use only these sources, and say so when they don't have the answer."),
+            ("code", 'ANSWER = """You are the admissions assistant for Northstar Skills.\n'
+                     'Answer only from the sources below. If they don\'t contain the answer, say you don\'t have that information '
+                     'and offer to have a counsellor message them.\nNever promise a job. Reply in under 60 words.\n\nSources:\n{sources}"""\n\n\n'
+                     'def answer(question, label=None, keep=lambda c: True):\n    found = search(question, keep=keep)\n'
+                     '    sources = "\\n".join(f"[{c[\'file\']}] {c[\'text\']}" for _, c in found)\n'
+                     '    print("Q:", question)\n    print("Sources:", ", ".join(c["file"] for _, c in found))\n'
+                     '    print("Answer:", llm.ask(question, system=ANSWER.format(sources=sources), label=label), "\\n")\n\n\n'
+                     'answer("mern course fees? emi?", "l5-ans-fees")\n'
+                     'answer("is hostel available near city centre campus? for girls", "l5-ans-hostel")\n'
+                     'answer("if I don\'t get a job do I get my money back?", "l5-ans-refund")'),
+            ("md", "The hostel answer admits it doesn't know. That's grounding working.\n\n"
+                   "🤔 *Now look at the fee answer and its sources. Is `old-fee-list.md` there?*"),
+            ("md", "**9. Bad documents, bad answers.** The old fee list matches fee questions just as well as the real page. "
+                   "No prompt fixes that. Fix the source: search only documents whose status is `current`."),
+            ("code", 'def current(c):\n    return c["status"] == "current"\n\n\n'
+                     'for keep, name in [(lambda c: True, "all documents"), (current, "current only")]:\n'
+                     '    print(name + ":", [c["file"] for _, c in search("full stack fees", k=4, keep=keep)])\n\n'
+                     'answer("mern course fees? emi?", "l5-ans-fees-fixed", keep=current)'),
+            ("md", "In real life, also ask Arjun to retire the old sheet, so counsellors stop copying from it."),
+            ("md", "**10. Measure your search.** Eight questions, each with the page that answers it. "
+                   "How often is the right page in the top 3?"),
+            ("code", 'tests = [\n    ("mern course fees?", "full-stack.md"),\n    ("can i pay in monthly installments?", "fees-and-emi.md"),\n'
+                     '    ("any scholarship? we can\'t afford the full fee", "scholarships.md"),\n    ("do you guarantee a job?", "placement.md"),\n'
+                     '    ("which campuses do you have?", "campuses.md"),\n    ("do I need my own laptop for video editing?", "video-editing.md"),\n'
+                     '    ("I want to leave, can I get a refund?", "refunds.md"),\n    ("is digital marketing available online?", "digital-marketing.md"),\n]\n\n\n'
+                     'def hit_rate(k=3, show=False):\n    hits = 0\n    for question, want in tests:\n'
+                     '        got = [c["file"] for _, c in search(question, k=k, keep=current)]\n        hits += want in got\n'
+                     '        if show and want not in got:\n            print(f"  missed: {question!r} wanted {want}, got {got}")\n'
+                     '    return hits / len(tests)\n\n\nprint(f"Right page in the top 3: {hit_rate(show=True):.0%}")'),
+            ("md", "**11. Your turn: change the chunk size.** 🤔 *Will smaller or bigger chunks find the right page more often?*"),
+            ("code", 'for size in [20, 50, 100]:\n    chunks = [c for d in docs for c in chunk(d, size=size, overlap=size // 5)]\n'
+                     '    vectors = embeddings.embed([c["text"] for c in chunks])\n'
+                     '    print(f"{size:>3} words: {len(chunks):>2} chunks, right page in top 3: {hit_rate():.0%}")\n\n'
+                     '# Put it back to 50 words\nchunks = [c for d in docs for c in chunk(d)]\nvectors = embeddings.embed([c["text"] for c in chunks])'),
+            ("md", "There's no single right size: it depends on the documents. That's why you measure instead of guessing."),
+            ("md", "**12. Put it on your GitHub.** Save a copy of this notebook (File → Save a copy in GitHub). "
+                   "Next lesson, the agent stops just answering and starts booking calls."),
+        ],
+    },
 }
 
 

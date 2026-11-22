@@ -7,9 +7,11 @@ one notebook at a time. Northstar Skills is a fictional client: every name, fee 
 | --- | --- |
 | `llm.py` | One `ask()` helper for Gemini, Claude or OpenAI, plus a no-key replay mode |
 | `recorded.py` | The recorded answers replay mode uses |
-| `northstar.py` | Northstar's data and the agent's tools: `get_fee`, `find_slots` |
+| `northstar.py` | Northstar's data and the agent's tools: `get_fee`, `find_slots`, `load_docs` |
+| `embeddings.py` | Free embeddings that run in Colab (all-MiniLM-L6-v2), with an offline fallback |
 | `data/fees.csv` | The current fee sheet |
 | `data/slots.csv` | Counselling slots, 16 to 28 November |
+| `data/docs/` | Course pages and policies, plus one out-of-date fee list |
 
 ## Choosing a model
 

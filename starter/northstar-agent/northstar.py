@@ -60,4 +60,16 @@ def find_slots(day, part="any"):
     return free or {"none": f"No free slots on {day} ({part})."}
 
 
+def load_docs():
+    """Northstar's documents: course pages and policies. Each has a title, owner, updated date and status."""
+    docs = []
+    folder = os.path.join(HERE, "data", "docs")
+    for name in sorted(os.listdir(folder)):
+        text = open(os.path.join(folder, name), encoding="utf-8").read()
+        _, head, body = text.split("---", 2)
+        meta = dict(line.split(": ", 1) for line in head.strip().splitlines())
+        docs.append({"file": name, **meta, "text": body.strip()})
+    return docs
+
+
 TOOLS = {"get_fee": get_fee, "find_slots": find_slots}

@@ -39,4 +39,14 @@ RECORDED = {
     "l4-temp-high": ["The Full Stack course costs ₹1,35,000, and you can pay in monthly EMIs!",
                      "It's ₹1,35,000 for Full Stack 🎉 EMI is possible too.",
                      "Full Stack is around 1.35 lakh, with easy EMI options."],
+
+    # Lesson 5 · grounded answers
+    "l5-ans-fees": "Full Stack (MERN) is ₹1,35,000 or ₹1,45,000, with EMI from about ₹11,300 to ₹12,100 a month. "
+                   "Please confirm the exact fee with a counsellor.",
+    "l5-ans-hostel": "I don't have information about hostels. Would you like a counsellor to message you about it today?",
+    "l5-ans-refund": "Northstar doesn't guarantee a job, so there's no refund if you don't get one. Our placement team "
+                     "helps every student prepare and apply. Refunds are only given within 14 days of joining. "
+                     "Shall I ask a counsellor to call you?",
+    "l5-ans-fees-fixed": "Full Stack Web Development (MERN) is ₹1,35,000, with EMI from ₹11,300 a month. "
+                         "Would you like a free counselling call?",
 }

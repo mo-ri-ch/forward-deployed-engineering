@@ -15,7 +15,7 @@ const COURSE_LESSONS = [
   { n: 4, step: "LLMs", title: "Building with LLMs", file: "lesson4.html", ready: true, test: 10,
     summary: "Prompts, answers in a fixed shape, and letting the model call tools.",
     leaves: "How does it answer from the client's own documents?" },
-  { n: 5, step: "RAG", title: "Answers from client documents", file: "lesson5.html", ready: true, test: 9,
+  { n: 5, step: "RAG", title: "Answers from client documents", file: "lesson5.html", ready: true, test: 10,
     summary: "Turn fee sheets and course pages into answers you can trust.",
     leaves: "How does it take actions, not just answer?" },
   { n: 6, step: "agents", title: "Agents and workflows", file: "lesson6.html", ready: true, test: 9,
