@@ -52,12 +52,45 @@ def get_fee(course):
 PARTS = {"morning": ("00:00", "12:00"), "afternoon": ("12:00", "17:00"), "evening": ("17:00", "23:59")}
 
 
+class Calendar:
+    """A copy of the counselling calendar in memory, so notebooks can book without touching the real one."""
+
+    def __init__(self):
+        self.slots = [dict(s) for s in SLOTS]
+
+    def find(self, day, part="any"):
+        """Free slots on a day (YYYY-MM-DD), in the morning, afternoon, evening or any time."""
+        lo, hi = PARTS.get(part, ("00:00", "23:59"))
+        free = [{"day": s["date"], "time": s["start"], "counsellor": s["counsellor"], "campus": s["campus"]}
+                for s in self.slots if s["date"] == day and s["status"] == "Free" and lo <= s["start"] < hi]
+        return free or {"none": f"No free slots on {day} ({part})."}
+
+    def get(self, day, time, counsellor):
+        """The slot itself, or None if there's no such slot."""
+        return next((s for s in self.slots if s["date"] == day and s["start"] == time
+                     and s["counsellor"].lower() == counsellor.lower()), None)
+
+    def bookings(self, lead):
+        """Every slot booked for this lead."""
+        return [s for s in self.slots if s["status"] == "Booked" and s["booked_by"] == lead]
+
+
+CALENDAR = Calendar()
+
+
 def find_slots(day, part="any"):
     """Free counselling slots on a day (YYYY-MM-DD), in the morning, afternoon, evening or any time."""
-    lo, hi = PARTS.get(part, ("00:00", "23:59"))
-    free = [{"time": s["start"], "counsellor": s["counsellor"], "campus": s["campus"]}
-            for s in SLOTS if s["date"] == day and s["status"] == "Free" and lo <= s["start"] < hi]
-    return free or {"none": f"No free slots on {day} ({part})."}
+    result = CALENDAR.find(day, part)
+    if isinstance(result, list):
+        return [{k: v for k, v in slot.items() if k != "day"} for slot in result]
+    return result
+
+
+def load_chats():
+    """The 20 sample enquiry chats from the client pack."""
+    import json
+    with open(os.path.join(HERE, "data", "sample_chats.json"), encoding="utf-8") as f:
+        return json.load(f)
 
 
 def load_docs():

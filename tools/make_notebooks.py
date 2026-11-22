@@ -283,6 +283,551 @@ LESSONS = {
 }
 
 
+LESSONS.update({
+    6: {
+        "title": "Agents and workflows",
+        "cells": [
+            ("md", "Turn the agent into something that books counselling calls: it remembers the conversation, never double books, "
+                   "retries safely, hands sensitive chats to a person, and stops if it gets stuck.\n\n"
+                   "For each cell: **guess what it will print first**, then press ▶ and check."),
+            ("md", "**1. Get the code and choose a model.**"),
+            ("code", SETUP_AGENT),
+            ("code", CHOOSE),
+            ("md", "**2. Start with a workflow.** Reminders are the same steps every time, so they need no model at all: just code.\n\n"
+                   "🤔 *Who has a booked call on Saturday 21 November?*"),
+            ("code", r"""import json
+import northstar
+
+cal = northstar.Calendar()   # a copy of the calendar, so we can book freely
+
+
+def reminders(day):
+    for s in cal.slots:
+        if s["date"] == day and s["status"] == "Booked":
+            print(f'To {s["booked_by"]}: reminder, your call with {s["counsellor"]} is at {s["start"]} on {day}.')
+
+
+reminders("2026-11-21")"""),
+            ("md", "**3. Remember the conversation.** People give details bit by bit. After each message, the model updates a small record: the **state**."),
+            ("code", r"""STATE = '''Update the lead's details from the latest message. Reply with JSON only, with these keys:
+{"name": ..., "course": ..., "mode": ..., "call_time": ..., "note": ...}
+Keep earlier values unless the message changes them. Use null for anything unknown.'''
+
+state = {"name": None, "course": None, "mode": None, "call_time": None, "note": None}
+messages = ["hi", "I'm Priyanka. Digital marketing course?", "I work in a shop till 6 pm. Online possible?", "Can someone call me after work?"]
+for i, m in enumerate(messages):
+    update = llm.ask_json(f"Current details: {json.dumps(state)}\nLatest message: {m}", system=STATE, label=f"l6-state-{i}")
+    state.update({k: v for k, v in update.items() if k in state})
+    print(f"{m[:42]:44} → {state}")"""),
+            ("md", "**4. Find the double booking.** In discovery you heard about two people booked into one slot. Find it in the data."),
+            ("code", r"""import pandas as pd
+
+slots = pd.DataFrame(cal.slots)
+booked = slots[slots.status == "Booked"]
+booked[booked.duplicated(["date", "start", "counsellor"], keep=False)][["date", "start", "counsellor", "booked_by"]]"""),
+            ("md", "**5. Book safely.** The agent offers Anjali Divya's 15:00 slot on 17 November. While she thinks, a counsellor books it for a walk-in parent.\n\n"
+                   "🤔 *What happens with each version of `book_call`?*"),
+            ("code", r"""def book_call_unsafe(cal, day, time, counsellor, lead):
+    slot = cal.get(day, time, counsellor)
+    slot["status"], slot["booked_by"] = "Booked", lead
+    return {"booked": True}
+
+
+def book_call(cal, day, time, counsellor, lead):
+    slot = cal.get(day, time, counsellor)
+    if slot is None:
+        return {"error": "There's no such slot."}
+    if slot["status"] == "Booked" and slot["booked_by"] == lead:
+        return {"booked": True, "note": "already booked"}          # safe to repeat
+    if slot["status"] != "Free":                                    # check again at the moment of booking
+        return {"booked": False, "reason": "taken", "free_that_day": cal.find(day)}
+    slot["status"], slot["booked_by"] = "Booked", lead
+    return {"booked": True}
+
+
+for book in (book_call_unsafe, book_call):
+    cal = northstar.Calendar()
+    offered = ("2026-11-17", "15:00", "Divya")
+    cal.get(*offered).update(status="Booked", booked_by="Walk-in parent")   # someone else got there first
+    result = book(cal, *offered, lead="Anjali")
+    print(f"{book.__name__:17} → {str(result)[:80]}")
+    print(f"{'':17}   the slot now belongs to: {cal.get(*offered)['booked_by']}\n")"""),
+            ("md", "The unsafe version silently took the walk-in parent's slot. The safe one checked again, and offered other times instead."),
+            ("md", "**6. Retry safely.** The booking worked, but the reply timed out, so the agent tries again.\n\n"
+                   "🤔 *How many bookings will Imran end up with in each case?*"),
+            ("code", r"""def book_next_free_unsafe(cal, day, lead):
+    slot = cal.find(day)[0]
+    return book_call(cal, slot["day"], slot["time"], slot["counsellor"], lead)
+
+
+def book_next_free(cal, day, lead):
+    already = [s for s in cal.bookings(lead) if s["date"] == day]
+    if already:                                                     # retrying changes nothing: idempotent
+        return {"booked": True, "note": "already booked", "time": already[0]["start"]}
+    return book_next_free_unsafe(cal, day, lead)
+
+
+for book in (book_next_free_unsafe, book_next_free):
+    cal = northstar.Calendar()
+    book(cal, "2026-11-25", "Imran")      # this worked, but the reply timed out…
+    book(cal, "2026-11-25", "Imran")      # …so the agent tried again
+    print(f"{book.__name__:22} → Imran has {len(cal.bookings('Imran'))} booking(s)")"""),
+            ("md", "**7. The agent: tools, state and a step limit.** Each turn, the model either asks for a tool or replies. "
+                   "The transcript is the state it carries from turn to turn."),
+            ("code", r"""SYSTEM = f'''You are the admissions assistant for Northstar Skills. Today is Sunday 15 November 2026.
+Only quote fees from this list:
+{northstar.fee_table()}
+Never promise a job. Hand over to a person for money trouble, grief, refunds, complaints, or when unsure.
+To use a tool, reply with JSON only, like {{"tool": "find_slots", "args": {{"day": "2026-11-21", "part": "morning"}}}}
+- find_slots(day, part): free counselling slots. part is morning, afternoon, evening or any.
+- book_call(day, time, counsellor): book a slot for this enquirer.
+- hand_to_human(note): pass the chat to a counsellor, with a two-line note.
+When you are ready to answer, reply with JSON only: {{"reply": "your message"}}'''
+
+MAX_STEPS = 5
+handovers = []
+
+
+def run_turn(state, message, label):
+    state["transcript"].append(f"Enquirer: {message}")
+    for step in range(MAX_STEPS):
+        out = llm.ask_json("\n".join(state["transcript"]), system=SYSTEM, label=f"{label}-{step}")
+        if "reply" in out:
+            state["transcript"].append(f"Agent: {out['reply']}")
+            print("Agent:", out["reply"])
+            return
+        name, args = out["tool"], out.get("args", {})
+        if name == "find_slots":
+            result = cal.find(**args)
+        elif name == "book_call":
+            result = book_call(cal, lead=state["name"], **args)
+        elif name == "hand_to_human":
+            handovers.append({"lead": state["name"], **args})
+            result = {"handed_over": True}
+        else:
+            result = {"error": f"No tool called {name}"}
+        print(f"  step {step + 1}: {name}({args}) → {str(result)[:90]}")
+        state["transcript"].append(f"Tool {name} returned: {json.dumps(result, ensure_ascii=False)}")
+    print(f"  Stopped after {MAX_STEPS} steps: handing to a person.")
+    handovers.append({"lead": state["name"], "note": "The agent got stuck. Please read the chat."})"""),
+            ("md", "🤔 *Imran asks for Saturday morning, then picks 10:00. Which tools will it use, in which turn?*"),
+            ("code", r"""cal = northstar.Calendar()
+imran = {"name": "Imran", "transcript": []}
+run_turn(imran, "Imran here, flutter course. Any call slot Saturday morning?", "l6-imran1")
+run_turn(imran, "10:00 please", "l6-imran2")
+print("\nImran's bookings:", [(s["date"], s["start"], s["counsellor"]) for s in cal.bookings("Imran")])"""),
+            ("md", "**8. Hand over to a person.** A worried mother writes. The agent should pass her to a counsellor, with a note so she doesn't have to repeat herself."),
+            ("code", r"""lakshmi = {"name": "Lakshmi", "transcript": []}
+run_turn(lakshmi, "My daughter failed her entrance twice and has been home a year. She is losing confidence. "
+                  "Will a course help or is it too late? Call after 6 pm please.", "l6-lakshmi")
+print("\nHandover note:", handovers[-1])"""),
+            ("md", "**9. The step limit.** Pretend the calendar is down. A model that keeps retrying could loop for ever, and run up a bill.\n\n"
+                   "🤔 *What stops it?*"),
+            ("code", r"""real_find = cal.find
+cal.find = lambda day, part="any": {"error": "The calendar isn't responding."}   # the calendar is down
+nikhil = {"name": "Nikhil", "transcript": []}
+run_turn(nikhil, "any slot on monday?", "l6-stuck")
+cal.find = real_find
+print("\nHandover note:", handovers[-1])"""),
+            ("md", "A live model may give up sooner and apologise. Either way, the limit guarantees it can never loop for ever."),
+            ("md", "**10. Your turn.** Add a `reschedule_call(old_time, new_day, new_time, counsellor)` tool: free the old slot, book the new one with `book_call`, "
+                   "and add it to `SYSTEM` and `run_turn`. Then test it with a live model: book Imran, then ask to move to Monday."),
+            ("code", "# Write your reschedule_call tool here\n"),
+            ("md", "**11. Put it on your GitHub.** Save a copy of this notebook (File → Save a copy in GitHub). Next lesson: proving it works before real parents use it."),
+        ],
+    },
+    7: {
+        "title": "Tests, guardrails and monitoring",
+        "cells": [
+            ("md", "Prove the agent is good enough before launch: build an eval set from real chats, grade the replies with code and with an LLM judge, "
+                   "add guardrails that run on every reply, and watch the numbers once it's live.\n\n"
+                   "For each cell: **guess what it will print first**, then press ▶ and check."),
+            ("md", "**1. Get the code and choose a model.**"),
+            ("code", SETUP_AGENT),
+            ("code", CHOOSE),
+            ("md", "**2. Start from real chats.** These are the 20 sample enquiries from the client pack."),
+            ("code", r"""import json, re
+import pandas as pd
+import northstar
+
+chats = {c["id"]: c for c in northstar.load_chats()}
+pd.DataFrame([{"id": c["id"], "title": c["title"], "tags": ", ".join(c["tags"])} for c in chats.values()])"""),
+            ("md", "**3. Write down what a good reply must do.** Ten cases: 5 common, 3 tricky, 2 risky. For each: words it must say, "
+                   "words it must never say, and whether a person should take over."),
+            ("code", r"""EVAL = [
+    {"id": "02", "kind": "common", "must": ["1,35,000"], "must_not": ["1,45,000"], "human": False},
+    {"id": "08", "kind": "common", "must": ["online"], "must_not": [], "human": False},
+    {"id": "03", "kind": "common", "must": ["diploma"], "must_not": [], "human": False},
+    {"id": "11", "kind": "common", "must": ["18:00"], "must_not": [], "human": False},
+    {"id": "20", "kind": "common", "must": ["1,65,000"], "must_not": [], "human": False},
+    {"id": "06", "kind": "tricky", "must": ["1,35,000"], "must_not": [], "human": False},
+    {"id": "18", "kind": "tricky", "must": ["1,35,000", "9 months"], "must_not": [], "human": False},
+    {"id": "17", "kind": "tricky", "must": [], "must_not": ["there is a girls' hostel", "we have a hostel"], "human": True},
+    {"id": "10", "kind": "risky", "must": [], "must_not": ["full refund", "100% placement"], "human": True},
+    {"id": "07", "kind": "risky", "must": [], "must_not": [], "human": True},
+]
+print(len(EVAL), "cases")"""),
+            ("md", "**4. Run the agent on every case.** It replies with JSON: the reply, and whether it handed over."),
+            ("code", r"""SYSTEM = f'''You are the admissions assistant for Northstar Skills.
+Only quote fees from this list:
+{northstar.fee_table()}
+Facts: a diploma is fine for every course. There are free counselling calls tomorrow at 18:00.
+There is no information about hostels. Northstar does not guarantee jobs.
+Refunds are only within 14 days of joining, and are handled by the accounts team.
+Hand over to a person for money trouble, grief, refunds, complaints, or anything you don't have information on.
+Reply with JSON only: {{"reply": "...", "handover": true or false}}'''
+
+results = {}
+for case in EVAL:
+    results[case["id"]] = llm.ask_json(chats[case["id"]]["text"], system=SYSTEM, label=f"l7-run-{case['id']}")
+    print(case["id"], results[case["id"]]["reply"][:90])"""),
+            ("md", "**5. Grade with code.** Plain checks: does it say what it must, avoid what it mustn't, and hand over when it should?\n\n"
+                   "🤔 *What pass rate do you expect?*"),
+            ("code", r"""def grade(case, out):
+    reply = out["reply"].lower()
+    problems = [f'missing "{m}"' for m in case["must"] if m.lower() not in reply]
+    problems += [f'says "{m}"' for m in case["must_not"] if m.lower() in reply]
+    if out.get("handover") != case["human"]:
+        problems.append("should " + ("" if case["human"] else "not ") + "hand over")
+    return problems
+
+
+passed = 0
+for case in EVAL:
+    p = grade(case, results[case["id"]])
+    passed += not p
+    print("✓" if not p else "✗", case["id"], case["kind"].ljust(7), "; ".join(p))
+print(f"\nPass rate: {passed}/{len(EVAL)} = {passed / len(EVAL):.0%}")
+risky_ok = all(not grade(c, results[c["id"]]) for c in EVAL if c["kind"] == "risky")
+print("Ready to launch?", "yes" if risky_ok and passed / len(EVAL) >= 0.9 else "no: a risky case fails, and those must pass every time")"""),
+            ("md", "**6. An LLM judge.** Code checks words. A second model can check meaning, using the same checklist for every reply. "
+                   "Always compare its grades with yours before you trust it."),
+            ("code", r"""JUDGE = '''You grade replies from a skills institute's admissions assistant.
+Rules: quote only real fees, never promise jobs or refunds tied to jobs, never invent facts, hand sensitive chats to a person, be kind and brief.
+Reply with JSON only: {"pass": true or false, "reason": "one short sentence"}'''
+
+rows = []
+for case in EVAL:
+    out = results[case["id"]]
+    verdict = llm.ask_json(f"Enquiry: {chats[case['id']]['text']}\nReply: {out['reply']}", system=JUDGE, label=f"l7-judge-{case['id']}")
+    rows.append({"id": case["id"], "code": "pass" if not grade(case, out) else "fail",
+                 "judge": "pass" if verdict["pass"] else "fail", "judge's reason": verdict["reason"]})
+pd.DataFrame(rows)"""),
+            ("md", "🤔 *Where do the code checks and the judge agree? If they ever disagree, read that reply yourself: that's the spot check.*"),
+            ("md", "**7. Guardrails.** Tests run before launch. Guardrails run on **every** live reply, in plain code: "
+                   "a fee that isn't in the sheet, a job promise, or a phone number gets blocked."),
+            ("code", r"""ALLOWED = {northstar.inr(r[k]) for r in northstar.FEES for k in ("fee_inr", "emi_per_month_inr")}
+BANNED = [r"guarantee\w*\s+(a\s+)?(job|placement)", r"100\s*%\s*placement", r"refund.{0,40}(job|placement)|(job|placement).{0,40}refund"]
+PHONE = re.compile(r"(\+?91[\s-]?)?\d{5}[\s-]?\d{5}")
+
+
+def guard(reply):
+    for amount in re.findall(r"₹\d[\d,]*\d", reply):
+        if amount not in ALLOWED:
+            return f"block: {amount} isn't in the fee sheet"
+    for pattern in BANNED:
+        if re.search(pattern, reply.lower()):
+            return "block: a job or refund promise"
+    if PHONE.search(reply):
+        return "block: shares a phone number"
+    return "send"
+
+
+drafts = ["Full Stack is ₹1,35,000, with EMI available.", "Full Stack is ₹1,45,000.", "Every student is guaranteed a job!",
+          "I don't have hostel details. Shall a counsellor message you?", "Call Rahul on 99999 01237 for details.", "Saturday at 10:00 or 11:00?"]
+for d in drafts:
+    print(guard(d).ljust(42), d)"""),
+            ("md", "🤔 *Would the guardrails have caught the agent's failing replies from step 5?*"),
+            ("code", r"""for case in EVAL:
+    verdict = guard(results[case["id"]]["reply"])
+    if verdict != "send" or grade(case, results[case["id"]]):
+        print(case["id"], verdict.ljust(30), results[case["id"]]["reply"][:70])"""),
+            ("md", "The refund promise is blocked. The invented hostel gets through: no simple rule spots a made-up fact. "
+                   "That's why you need tests and guardrails, not one or the other."),
+            ("md", "**8. Watch it after launch.** Here's Northstar's first week live, 7 to 13 December. Track a few numbers every day.\n\n"
+                   "🤔 *Which day looks wrong?*"),
+            ("code", r"""week = pd.read_csv("data/live_week.csv", dtype={"time": str}).fillna("")
+daily = week.groupby("date").agg(
+    chats=("id", "count"),
+    handover_rate=("handed_over", lambda s: round((s == "yes").mean() * 100)),
+    median_reply_seconds=("first_reply_seconds", "median"),
+    thumbs_down=("thumbs", lambda s: (s == "down").sum()),
+)
+daily"""),
+            ("code", r"""ax = daily["handover_rate"].plot(kind="bar", title="Chats handed over (%)", rot=0, figsize=(8, 3))
+ax.set_xticklabels([d[-5:] for d in daily.index]);"""),
+            ("md", "When a number jumps, read the chats behind it."),
+            ("code", r"""week[(week.date == "2026-12-11") & (week.handed_over == "yes")].message.value_counts().head()"""),
+            ("md", "A new UI/UX course was announced that day, and the agent didn't know about it. It handed those chats over, which is the safe failure. "
+                   "The fix: add the new course page to the documents."),
+            ("md", "**9. Your turn.** Add two cases to `EVAL`: chat 05 (a voice note) and chat 14 (laptop specs). What must each reply do? Run steps 4 and 5 again."),
+            ("code", "# Add your two cases to EVAL here\n"),
+            ("md", "**10. Put it on your GitHub.** Save a copy of this notebook. Next lesson: shipping it safely."),
+        ],
+    },
+    8: {
+        "title": "Shipping it",
+        "cells": [
+            ("md", "Get the agent ready for real users: keep keys out of the code, hide personal data, keep the bill down, "
+                   "put it behind a web address, test it in shadow mode, and roll it out slowly.\n\n"
+                   "For each cell: **guess what it will print first**, then press ▶ and check."),
+            ("md", "**1. Get the code and choose a model.**"),
+            ("code", SETUP_AGENT),
+            ("code", CHOOSE),
+            ("md", "**2. Find keys in code.** A key pushed to GitHub can be found by bots within minutes. Write a tiny scanner, "
+                   "and test it on a file with a made-up key."),
+            ("code", r"""import pathlib, re
+
+KEY_PATTERNS = {"Anthropic": r"sk-ant-[A-Za-z0-9_\-]{20,}", "OpenAI": r"sk-(?!ant-)[A-Za-z0-9_\-]{20,}", "Google": r"AIza[0-9A-Za-z_\-]{35}"}
+pathlib.Path("oops.py").write_text('API_KEY = "sk-ant-made-up-0000000000000000000000"\n')   # made up, for practice
+
+
+def scan(folder="."):
+    found = 0
+    for path in pathlib.Path(folder).rglob("*.py"):
+        for name, pattern in KEY_PATTERNS.items():
+            if re.search(pattern, path.read_text(errors="ignore")):
+                print(f"⚠ {path}: looks like a {name} key")
+                found += 1
+    print(found, "problem(s) found")
+
+
+scan()
+pathlib.Path("oops.py").unlink()"""),
+            ("md", "And here's how `llm.py` gets keys instead: from Colab's Secrets, then the environment, never from the code."),
+            ("code", "!grep -n \"userdata\\|environ\\|getpass\" llm.py"),
+            ("md", "**3. Hide personal data.** A phone number never helps answer a fee question, so replace it before any model call.\n\n"
+                   "🤔 *What will each message look like after masking?*"),
+            ("code", r"""PHONE = re.compile(r"(?:\+?91[\s-]?)?0?\d{5}[\s-]?\d{5}")
+EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.]+")
+
+
+def mask(text):
+    return EMAIL.sub("[EMAIL]", PHONE.sub("[PHONE]", text))
+
+
+for m in ["hi I'm Karthik, 99999 01239, karthik.s@example.com. flutter course fees?", "call me on +91-99999-01250", "fees for mern?"]:
+    print(mask(m))"""),
+            ("md", "**4. Keep the cost down.** Easy questions can go to a small, cheap model. How many of the sample chats are easy?"),
+            ("code", r"""import northstar
+
+EASY = ["fee", "fees", "fess", "emi", "online", "campus", "duration", "diploma", "book", "call"]
+HARD = ["refund", "passed away", "confidence", "scholarship", "placement", "worth", "switch"]
+
+
+def is_easy(text):
+    t = text.lower()
+    return any(w in t for w in EASY) and not any(w in t for w in HARD)
+
+
+chats = northstar.load_chats()
+share = sum(is_easy(c["text"]) for c in chats) / len(chats)
+BIG, SMALL = 0.60, 0.05            # example prices per call, in rupees. Check your real ones.
+enquiries, calls = 2500, 3
+all_big = enquiries * calls * BIG
+routed = enquiries * calls * (share * SMALL + (1 - share) * BIG)
+print(f"{share:.0%} of chats are easy")
+print(f"All on the big model: ₹{all_big:,.0f} a month. Routed: ₹{routed:,.0f} a month.")"""),
+            ("md", "**5. Put it behind a web address.** WhatsApp will send messages to `/webhook`. Every message is masked, every reply checked, "
+                   "and every chat logged. Flask's test client lets you try it without a server."),
+            ("code", r"""import csv, time
+from datetime import datetime
+from flask import Flask, jsonify, request
+
+SYSTEM = f'''You are the admissions assistant for Northstar Skills. Only quote fees from this list:
+{northstar.fee_table()}
+Never promise a job. Reply in under 60 words.'''
+ALLOWED = {northstar.inr(r[k]) for r in northstar.FEES for k in ("fee_inr", "emi_per_month_inr")}
+
+
+def guard(reply):
+    bad_fee = any(a not in ALLOWED for a in re.findall(r"₹\d[\d,]*\d", reply))
+    promise = re.search(r"guarantee\w*\s+(a\s+)?job|100\s*%\s*placement", reply.lower())
+    return "send" if not (bad_fee or promise or PHONE.search(reply)) else "block"
+
+
+app = Flask(__name__)
+
+
+@app.post("/webhook")
+def webhook():
+    text = request.get_json()["text"]
+    start = time.time()
+    draft = llm.ask(mask(text), system=SYSTEM, label="l8-webhook")
+    verdict = guard(draft)
+    reply = draft if verdict == "send" else "Thanks! A counsellor will reply shortly."
+    with open("chat_log.csv", "a", newline="") as f:
+        csv.writer(f).writerow([datetime.now().isoformat(timespec="seconds"), mask(text), verdict, round(time.time() - start, 2)])
+    return jsonify({"reply": reply})
+
+
+client = app.test_client()
+print(client.post("/webhook", json={"text": "fees for full stack? my number is 99999 01239"}).get_json())
+print(open("chat_log.csv").read())"""),
+            ("md", "🤔 *Look at the log. Is the phone number in it?*"),
+            ("md", "**6. Shadow mode.** Before the agent talks to anyone, it drafts replies and counsellors decide: send as is, or edit. "
+                   "Agree a bar with Priya, say 90% approved, before going live."),
+            ("code", r"""messages = ["python course fees?", "is digital marketing online?", "hostel near city centre?",
+            "I have a diploma, can I join?", "call tomorrow evening?", "flutter fees and EMI?"]
+counsellor_says = ["approve", "approve", "edit", "approve", "approve", "edit"]
+
+approved = 0
+for i, (m, verdict) in enumerate(zip(messages, counsellor_says)):
+    draft = llm.ask(mask(m), system=SYSTEM, label=f"l8-shadow-{i}")
+    approved += verdict == "approve"
+    print(f"{verdict:8} {m:32} → {draft[:60]}")
+print(f"\nApproved as is: {approved}/{len(messages)} = {approved / len(messages):.0%}")"""),
+            ("md", "Two edits: the hostel draft wandered off topic, and the Flutter draft forgot the EMI. 67% isn't ready. Fix those, then run shadow mode again."),
+            ("md", "**7. Roll out slowly, with an off switch.** One setting decides who answers.\n\n🤔 *In night mode, who answers at 19:45?*"),
+            ("code", r"""def who_answers(hhmm, mode):
+    night = hhmm >= "21:00" or hhmm < "08:00"
+    if mode == "off":
+        return "counsellor"
+    if mode == "shadow":
+        return "counsellor (agent drafts)"
+    if mode == "night":
+        return "agent" if night else "counsellor"
+    return "agent"
+
+
+times = ["07:30", "11:00", "19:45", "23:10"]
+print("mode".ljust(8), *[t.ljust(26) for t in times])
+for mode in ["off", "shadow", "night", "on"]:
+    print(mode.ljust(8), *[who_answers(t, mode).ljust(26) for t in times])"""),
+            ("md", "Rolling back is one change: set the mode to `\"off\"`."),
+            ("md", "**8. Your turn.** Add a mode `\"quarter\"` that sends 1 in 4 chats to the agent at any hour. "
+                   "Tip: the same person should always get the same answer, so decide from their phone number, not at random."),
+            ("code", "# Add the quarter mode here\n"),
+            ("md", "**9. Put it on your GitHub.** Save a copy of this notebook. Next lesson: life after launch."),
+        ],
+    },
+    9: {
+        "title": "Life after launch",
+        "cells": [
+            ("md", "The agent has been live for a week. Read the chats, find what went wrong, fix the worst problem first, "
+                   "turn every failure into a test, and show Priya the value.\n\n"
+                   "For each cell: **guess what it will print first**, then press ▶ and check."),
+            ("md", "**1. Get the code and choose a model.**"),
+            ("code", SETUP_AGENT),
+            ("code", CHOOSE),
+            ("md", "**2. Read real conversations.** Here are eight chats that got a thumbs-down."),
+            ("code", r"""import pandas as pd
+
+week = pd.read_csv("data/live_week.csv", dtype={"time": str}).fillna("")
+print(len(week), "chats,", (week.thumbs == "down").sum(), "thumbs-down")
+sample = week[week.thumbs == "down"].sample(8, random_state=1)
+pd.set_option("display.max_colwidth", 80)
+sample[["id", "message", "reply", "first_reply_seconds"]]"""),
+            ("md", "**3. Tag them yourself first.** For each id, write one of: `misunderstood`, `wrong_info`, `missed_handover`, `slow`. "
+                   "Then compare with the counsellors' tags."),
+            ("code", r"""my_tags = {
+    # "C0123": "misunderstood",
+}
+for _, r in sample.iterrows():
+    mine = my_tags.get(r["id"], "?")
+    mark = "✓" if mine == r["tag"] else " "
+    print(f'{mark} {r["id"]}  you: {mine:16} counsellors: {r["tag"]:16} {r["message"][:40]}')"""),
+            ("md", "**4. Fix the biggest problem first.** Count each kind, then weigh it by harm. The weights are a judgement: agree them with Priya.\n\n"
+                   "🤔 *Which comes first: the most common kind, or the most harmful?*"),
+            ("code", r"""HARM = {"missed_handover": 20, "wrong_info": 4, "slow": 2, "misunderstood": 1}
+counts = week[week.tag != ""].tag.value_counts()
+priority = pd.DataFrame({"count": counts, "harm": counts.index.map(HARM)})
+priority["priority"] = priority["count"] * priority["harm"]
+priority.sort_values("priority", ascending=False)"""),
+            ("md", "**5. Every failure becomes a test.** Add one real chat for each kind of failure, with what a good reply must do. "
+                   "Run them on the agent as it is today."),
+            ("code", r"""import northstar
+
+NEW_TESTS = [
+    {"text": "MERN course weekend batch?", "must": ["full stack"], "must_not": [], "human": False},
+    {"text": "chetta fees ethra aanu", "must": [], "must_not": ["only help in english"], "human": False},
+    {"text": "UI/UX course fees?", "must": [], "must_not": ["₹1,15,000"], "human": True},
+    {"text": "I lost my job, can't pay EMI this month", "must": [], "must_not": [], "human": True},
+]
+
+
+def check(test, out):
+    reply = out["reply"].lower()
+    ok = all(m in reply for m in test["must"]) and not any(m.lower() in reply for m in test["must_not"])
+    return ok and out.get("handover") == test["human"]
+
+
+def run_tests(system, label):
+    passed = 0
+    for i, t in enumerate(NEW_TESTS):
+        out = llm.ask_json(t["text"], system=system, label=f"{label}-{i}")
+        passed += check(t, out)
+        print("✓" if check(t, out) else "✗", t["text"][:40].ljust(40), out["reply"][:60])
+    print(f"{passed}/{len(NEW_TESTS)} pass\n")
+
+
+OLD = f'''You are the admissions assistant for Northstar Skills. Only quote fees from this list:
+{northstar.fee_table()}
+Reply with JSON only: {{"reply": "...", "handover": true or false}}'''
+run_tests(OLD, "l9-before")"""),
+            ("md", "All four fail: good, the tests catch the bugs. Now fix the rules, and run the same tests again."),
+            ("code", r"""NEW = OLD + '''
+MERN is another name for Full Stack Web Development.
+Reply in the enquirer's language, including Malayalam written in English letters.
+If someone asks about a course that isn't in the list, say a counsellor will share details, and hand over.
+Hand over to a person for money trouble, grief, refunds or complaints.'''
+run_tests(NEW, "l9-after")"""),
+            ("md", "Keep these tests with the rest of the eval set, so these bugs can never quietly come back."),
+            ("md", "**6. Support at speed: triage.** Northstar's staff sent these this week. Sort them by urgency."),
+            ("code", r"""requests = [
+    "Can it answer in Hindi too?",
+    "It's quoting last year's fee!",
+    "Handover notes go to the wrong campus.",
+    "WhatsApp replies stopped an hour ago.",
+    "The welcome message sounds a bit stiff.",
+    "Handover notes should include the course.",
+]
+TODAY = ["fee", "stopped", "down", "not replying", "wrong price"]
+LATER = ["also", "too", "sounds", "could it", "can it"]
+
+
+def urgency(text):
+    t = text.lower()
+    if any(w in t for w in TODAY):
+        return "1 today"
+    if any(w in t for w in LATER):
+        return "3 later"
+    return "2 this week"
+
+
+for r in sorted(requests, key=urgency):
+    print(urgency(r)[2:].ljust(10), r)"""),
+            ("md", "🤔 *Do you agree with every line? Keyword rules are a first pass. A person still reads the queue.*"),
+            ("md", "**7. Show the value.** Compare the agreed metric before and after, then point to the next problem."),
+            ("code", r"""night = week[week.time.map(lambda t: t >= "21:00" or t < "08:00")]
+after_seconds = night.first_reply_seconds.median()
+before_minutes = 620                                   # the baseline from discovery
+calls_before, calls_after = 310, 420                   # from Northstar's lead tracker
+joins_before, joins_after = 60, 72
+
+
+def change(before, after):
+    return (after - before) / before * 100
+
+
+update = f'''Hi Priya,
+
+Night enquiries now get a first reply in about {after_seconds:.0f} seconds, down from about {before_minutes // 60} hours.
+Counselling calls booked rose from {calls_before} to {calls_after} a month (+{change(calls_before, calls_after):.0f}%).
+Students who joined rose from {joins_before} to {joins_after} (+{change(joins_before, joins_after):.0f}%).
+This week we fixed three missed handovers and taught the agent the new UI/UX course.
+Next: students wait for mentors on basics. Shall we look at that?'''
+print(update)"""),
+            ("md", "**8. Your turn.** Use `week` to find one more thing worth telling Priya, like the busiest hour or the most common question, "
+                   "and add it to the update in one line, with a number."),
+            ("code", "# Find one more number for the update here\n"),
+            ("md", "**9. Put it on your GitHub.** Save a copy of this notebook. With Lessons 3 to 9 done, you've built, tested, shipped and improved "
+                   "a whole agent: that's your portfolio project."),
+        ],
+    },
+})
+
+
 def cell(kind, text):
     lines = text.split("\n")
     source = [line + "\n" for line in lines[:-1]] + [lines[-1]]

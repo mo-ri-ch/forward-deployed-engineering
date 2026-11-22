@@ -1,0 +1,368 @@
+[
+ {
+  "id": "01",
+  "title": "Late-night parent, fees and job guarantee",
+  "tags": [
+   "fees",
+   "emi",
+   "placement promise",
+   "parent",
+   "after hours"
+  ],
+  "messages": [
+   {
+    "time": "23:42",
+    "from": "enquirer",
+    "text": "hi my son finished plus two, wat is fees for python course? is job guranteed"
+   },
+   {
+    "time": "23:43",
+    "from": "enquirer",
+    "text": "emi possible?"
+   }
+  ],
+  "text": "hi my son finished plus two, wat is fees for python course? is job guranteed / emi possible?"
+ },
+ {
+  "id": "02",
+  "title": "Mixed-language fee question",
+  "tags": [
+   "fees",
+   "campus",
+   "code-mixed"
+  ],
+  "messages": [
+   {
+    "time": "14:10",
+    "from": "enquirer",
+    "text": "chetta full stack course nte fees ethra aanu"
+   },
+   {
+    "time": "14:10",
+    "from": "enquirer",
+    "text": "tech park campus undo?"
+   }
+  ],
+  "text": "chetta full stack course nte fees ethra aanu / tech park campus undo?"
+ },
+ {
+  "id": "03",
+  "title": "Diploma eligibility",
+  "tags": [
+   "eligibility"
+  ],
+  "messages": [
+   {
+    "time": "11:20",
+    "from": "enquirer",
+    "text": "I have a mechanical diploma. can I join the mobile app course or is degree needed?"
+   }
+  ],
+  "text": "I have a mechanical diploma. can I join the mobile app course or is degree needed?"
+ },
+ {
+  "id": "04",
+  "title": "Gap-year worry",
+  "tags": [
+   "emotional",
+   "needs a human",
+   "parent",
+   "after hours"
+  ],
+  "messages": [
+   {
+    "time": "21:15",
+    "from": "enquirer",
+    "text": "My daughter failed her engineering entrance twice and has been home for a year. She is losing confidence. Will a course like this even help her or is it too late?"
+   }
+  ],
+  "text": "My daughter failed her engineering entrance twice and has been home for a year. She is losing confidence. Will a course like this even help her or is it too late?"
+ },
+ {
+  "id": "05",
+  "title": "Voice note only",
+  "tags": [
+   "voice note",
+   "missing content"
+  ],
+  "messages": [
+   {
+    "time": "19:02",
+    "from": "enquirer",
+    "text": "[voice note, 0:47]"
+   },
+   {
+    "time": "19:10",
+    "from": "enquirer",
+    "text": "??"
+   }
+  ],
+  "text": "[voice note, 0:47] / ??"
+ },
+ {
+  "id": "06",
+  "title": "Conflicting fee quote",
+  "tags": [
+   "fees",
+   "conflicting sources"
+  ],
+  "messages": [
+   {
+    "time": "16:00",
+    "from": "enquirer",
+    "text": "your website says full stack is 1,35,000 but the counsellor told my friend 1,45,000 last week. which is correct?"
+   }
+  ],
+  "text": "your website says full stack is 1,35,000 but the counsellor told my friend 1,45,000 last week. which is correct?"
+ },
+ {
+  "id": "07",
+  "title": "Scholarship and hardship",
+  "tags": [
+   "scholarship",
+   "financial hardship",
+   "needs a human",
+   "after hours"
+  ],
+  "messages": [
+   {
+    "time": "20:30",
+    "from": "enquirer",
+    "text": "my father passed away last year and we can't pay full fees. do you have any scholarship?"
+   }
+  ],
+  "text": "my father passed away last year and we can't pay full fees. do you have any scholarship?"
+ },
+ {
+  "id": "08",
+  "title": "Online or hybrid",
+  "tags": [
+   "course format",
+   "working student"
+  ],
+  "messages": [
+   {
+    "time": "08:15",
+    "from": "enquirer",
+    "text": "is the digital marketing course available online? I work in a shop till 6 pm"
+   }
+  ],
+  "text": "is the digital marketing course available online? I work in a shop till 6 pm"
+ },
+ {
+  "id": "09",
+  "title": "Is it worth it?",
+  "tags": [
+   "objection",
+   "skeptical"
+  ],
+  "messages": [
+   {
+    "time": "13:05",
+    "from": "enquirer",
+    "text": "why should I pay 1.3 lakh when there are free youtube courses?"
+   },
+   {
+    "time": "13:06",
+    "from": "enquirer",
+    "text": "honest answer pls"
+   }
+  ],
+  "text": "why should I pay 1.3 lakh when there are free youtube courses? / honest answer pls"
+ },
+ {
+  "id": "10",
+  "title": "Your ad says 100% placement",
+  "tags": [
+   "placement promise",
+   "guardrail",
+   "needs a human"
+  ],
+  "messages": [
+   {
+    "time": "17:45",
+    "from": "enquirer",
+    "text": "your instagram ad says 100% placement. so if I don't get a job I get refund right?"
+   }
+  ],
+  "text": "your instagram ad says 100% placement. so if I don't get a job I get refund right?"
+ },
+ {
+  "id": "11",
+  "title": "Booking and rescheduling",
+  "tags": [
+   "booking",
+   "calendar"
+  ],
+  "messages": [
+   {
+    "time": "10:00",
+    "from": "enquirer",
+    "text": "can I book the free counselling call tomorrow evening?"
+   }
+  ],
+  "text": "can I book the free counselling call tomorrow evening?"
+ },
+ {
+  "id": "12",
+  "title": "Just hi",
+  "tags": [
+   "low intent"
+  ],
+  "messages": [
+   {
+    "time": "15:30",
+    "from": "enquirer",
+    "text": "hi"
+   }
+  ],
+  "text": "hi"
+ },
+ {
+  "id": "13",
+  "title": "Career switcher",
+  "tags": [
+   "working professional",
+   "weekend batch",
+   "after hours"
+  ],
+  "messages": [
+   {
+    "time": "22:10",
+    "from": "enquirer",
+    "text": "I'm 31, working in accounts for 8 years. Is it possible to switch to tech? Do you have weekend batches?"
+   }
+  ],
+  "text": "I'm 31, working in accounts for 8 years. Is it possible to switch to tech? Do you have weekend batches?"
+ },
+ {
+  "id": "14",
+  "title": "Video course and laptop",
+  "tags": [
+   "information gap"
+  ],
+  "messages": [
+   {
+    "time": "12:40",
+    "from": "enquirer",
+    "text": "for video editing course do I need my own laptop? what specs?"
+   }
+  ],
+  "text": "for video editing course do I need my own laptop? what specs?"
+ },
+ {
+  "id": "15",
+  "title": "Same person, second number",
+  "tags": [
+   "duplicate lead"
+  ],
+  "messages": [
+   {
+    "time": "09:05",
+    "from": "enquirer",
+    "text": "hi this is Karthik, I messaged from my dad's number yesterday about flutter course. pls send details here"
+   }
+  ],
+  "text": "hi this is Karthik, I messaged from my dad's number yesterday about flutter course. pls send details here"
+ },
+ {
+  "id": "16",
+  "title": "Existing student asking for a refund",
+  "tags": [
+   "wrong channel",
+   "refund",
+   "needs a human"
+  ],
+  "messages": [
+   {
+    "time": "18:20",
+    "from": "enquirer",
+    "text": "I joined last month but want to stop. how do I get a refund?"
+   }
+  ],
+  "text": "I joined last month but want to stop. how do I get a refund?"
+ },
+ {
+  "id": "17",
+  "title": "Hostel question",
+  "tags": [
+   "information gap",
+   "after hours"
+  ],
+  "messages": [
+   {
+    "time": "20:00",
+    "from": "enquirer",
+    "text": "is hostel facility available near the city centre campus? for girls"
+   }
+  ],
+  "text": "is hostel facility available near the city centre campus? for girls"
+ },
+ {
+  "id": "18",
+  "title": "Rapid-fire messages",
+  "tags": [
+   "message bursts",
+   "typos"
+  ],
+  "messages": [
+   {
+    "time": "16:12",
+    "from": "enquirer",
+    "text": "hlo"
+   },
+   {
+    "time": "16:12",
+    "from": "enquirer",
+    "text": "mern course"
+   },
+   {
+    "time": "16:12",
+    "from": "enquirer",
+    "text": "fess?"
+   },
+   {
+    "time": "16:13",
+    "from": "enquirer",
+    "text": "duration"
+   },
+   {
+    "time": "16:13",
+    "from": "enquirer",
+    "text": "and intrnship paid or not"
+   }
+  ],
+  "text": "hlo / mern course / fess? / duration / and intrnship paid or not"
+ },
+ {
+  "id": "19",
+  "title": "Current student with a coding question",
+  "tags": [
+   "wrong channel",
+   "after hours"
+  ],
+  "messages": [
+   {
+    "time": "23:55",
+    "from": "enquirer",
+    "text": "npm install giving error EACCES permission denied what to do"
+   }
+  ],
+  "text": "npm install giving error EACCES permission denied what to do"
+ },
+ {
+  "id": "20",
+  "title": "Ready to join",
+  "tags": [
+   "high intent"
+  ],
+  "messages": [
+   {
+    "time": "11:00",
+    "from": "enquirer",
+    "text": "I've decided. I want to join the python AI course next batch. what are the steps and documents needed?"
+   }
+  ],
+  "text": "I've decided. I want to join the python AI course next batch. what are the steps and documents needed?"
+ }
+]

@@ -29,8 +29,12 @@ Hands-on Colab notebooks build the Northstar admissions agent step by step, on r
 | [Lesson 3](notebooks/lesson3.ipynb) | Fix the duplicate-lead bug in Kevin's code, with tests, and clean up the sheet |
 | [Lesson 4](notebooks/lesson4.ipynb) | Call a real model: system prompt, JSON answers, a tiny eval set, and tools for fees and slots |
 | [Lesson 5](notebooks/lesson5.ipynb) | Chunk Northstar's documents, embed and search them, answer only from sources, catch the old fee list, measure search |
+| [Lesson 6](notebooks/lesson6.ipynb) | State, safe bookings and retries, handovers with notes, a step limit |
+| [Lesson 7](notebooks/lesson7.ipynb) | An eval set from real chats, code checks and an LLM judge, guardrails, monitoring the first week |
+| [Lesson 8](notebooks/lesson8.ipynb) | Key scanning, masking personal data, routing to cut cost, a logged webhook, shadow mode, rollout modes |
+| [Lesson 9](notebooks/lesson9.ipynb) | Tag a week of failures, fix the worst first, turn failures into tests, triage, the monthly update |
 
-Starter code lives in [`starter/`](starter/). The notebooks are built from `tools/make_notebooks.py`.
+Starter code lives in [`starter/`](starter/). The notebooks are built from `tools/make_notebooks.py`; the first-week log from `tools/make_live_week.py`.
 
 The client, Northstar Skills, is made up. Every name, number and message in the course is invented.
 
