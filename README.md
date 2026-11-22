@@ -27,6 +27,7 @@ Hands-on Colab notebooks build the Northstar admissions agent step by step, on r
 | Notebook | What you do |
 | --- | --- |
 | [Lesson 3](notebooks/lesson3.ipynb) | Fix the duplicate-lead bug in Kevin's code, with tests, and clean up the sheet |
+| [Lesson 4](notebooks/lesson4.ipynb) | Call a real model: system prompt, JSON answers, a tiny eval set, and tools for fees and slots |
 
 Starter code lives in [`starter/`](starter/). The notebooks are built from `tools/make_notebooks.py`.
 

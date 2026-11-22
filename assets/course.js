@@ -12,7 +12,7 @@ const COURSE_LESSONS = [
   { n: 3, step: "their code", title: "Reading someone else's code", file: "lesson3.html", ready: true, test: 10,
     summary: "Find your way around a client's codebase, and fix a bug without breaking anything.",
     leaves: "How do you get a language model to do the job reliably?" },
-  { n: 4, step: "LLMs", title: "Building with LLMs", file: "lesson4.html", ready: true, test: 9,
+  { n: 4, step: "LLMs", title: "Building with LLMs", file: "lesson4.html", ready: true, test: 10,
     summary: "Prompts, answers in a fixed shape, and letting the model call tools.",
     leaves: "How does it answer from the client's own documents?" },
   { n: 5, step: "RAG", title: "Answers from client documents", file: "lesson5.html", ready: true, test: 9,

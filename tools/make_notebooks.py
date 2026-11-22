@@ -14,6 +14,17 @@ if not os.path.exists("/content/forward-deployed-engineering"):
     !git clone -q --depth 1 {REPO} /content/forward-deployed-engineering
 %cd /content/forward-deployed-engineering/starter/northstar-leads'''
 
+SETUP_AGENT = f'''import os
+if not os.path.exists("/content/forward-deployed-engineering"):
+    !git clone -q --depth 1 {REPO} /content/forward-deployed-engineering
+%cd /content/forward-deployed-engineering/starter/northstar-agent
+!pip install -q google-genai anthropic openai'''
+
+CHOOSE = '''PROVIDER = "replay"   # "gemini" (free tier), "claude", "openai", or "replay" (no key: recorded answers)
+
+import llm
+llm.setup(PROVIDER)'''
+
 LESSONS = {
     3: {
         "title": "Fix a bug in someone else's code",
@@ -104,6 +115,92 @@ LESSONS = {
                    "This cell downloads your two files, so you can paste them in."),
             ("code", 'try:\n    from google.colab import files\n    files.download("leads.py")\n    files.download("tests/test_phone_formats.py")\n'
                      'except ImportError:\n    print("Not in Colab: your files are in", os.getcwd())'),
+        ],
+    },
+    4: {
+        "title": "Build with a language model",
+        "cells": [
+            ("md", "Make Northstar's admissions agent answer correctly: rules in a system prompt, answers your code can read, "
+                   "and tools that check the real fee sheet and calendar.\n\n"
+                   "For each cell: **guess what it will print first**, then press ▶ and check."),
+            ("md", "**1. Get the code.**"),
+            ("code", SETUP_AGENT),
+            ("md", "**2. Choose a model.** Start with `\"replay\"`: no key needed, and every step shows a recorded answer. "
+                   "For a live model, make a free Gemini key at [aistudio.google.com](https://aistudio.google.com), save it under 🔑 Secrets "
+                   "as `GEMINI_API_KEY`, and change `PROVIDER` to `\"gemini\"`.\n\n"
+                   "Free tiers may use what you send to improve the provider's products. Northstar's data is made up, so that's fine here. "
+                   "Never send a real client's data to a free tier."),
+            ("code", CHOOSE),
+            ("md", "**3. A first call, with no rules.** A parent asks about the fee and a job guarantee.\n\n"
+                   "🤔 *The model has never seen Northstar's fee sheet. What will it say?*"),
+            ("code", 'MESSAGE = "hi wat is fees for full stack? job guranteed?"\nprint(llm.ask(MESSAGE, label="l4-no-rules"))'),
+            ("md", "It guessed a fee, and may have promised a job. Both are things Northstar must never say."),
+            ("md", "**4. Write the rules: a system prompt.** Give it who it is, the real fees, and what it must never do."),
+            ("code", 'import northstar\n\nSYSTEM = f"""You are the admissions assistant for Northstar Skills, a skills institute.\n'
+                     'Only quote fees from this list:\n{northstar.fee_table()}\n'
+                     'Never promise a job. Say the placement team helps every student prepare and apply.\n'
+                     'Reply in under 60 words, in the enquirer\'s language. Offer a free counselling call at the end."""\n\n'
+                     'print(SYSTEM)'),
+            ("code", 'print(llm.ask(MESSAGE, system=SYSTEM, label="l4-with-rules"))'),
+            ("md", "🤔 *With a live model: delete the \"Never promise a job\" line, run both cells again, and see what changes.*"),
+            ("md", "**5. Answers your code can use.** Ask for JSON, so your code can decide what to do. "
+                   "Five real-style messages; the last column is the answer you'd expect."),
+            ("code", 'CLASSIFY = """Read the enquiry. Reply with JSON only, like:\n'
+                     '{"intent": "fees", "course": "Python & AI", "needs_human": false}\n'
+                     'intent is one of: fees, booking, course_info, scholarship, refund, complaint, other.\n'
+                     'course is a Northstar course name, or null.\n'
+                     'needs_human is true for money trouble, grief, refunds, complaints, or when you are unsure."""\n\n'
+                     'tests = [\n    ("chetta full stack course nte fees ethra aanu", "fees", False),\n'
+                     '    ("can I book a call saturday morning?", "booking", False),\n'
+                     '    ("my father passed away, we can\'t pay full fees. any scholarship?", "scholarship", True),\n'
+                     '    ("I joined last month and want a refund", "refund", True),\n'
+                     '    ("is the digital marketing course online?", "course_info", False),\n]\n\n'
+                     'right = 0\nfor i, (text, want_intent, want_human) in enumerate(tests):\n'
+                     '    out = llm.ask_json(text, system=CLASSIFY, label=f"l4-classify-{i}")\n'
+                     '    ok = out.get("intent") == want_intent and out.get("needs_human") == want_human\n'
+                     '    right += ok\n    print("✓" if ok else "✗", text[:45].ljust(45), out)\nprint(f"\\n{right} of {len(tests)} right")'),
+            ("md", "That last loop is a tiny **eval set**: messages plus the answers you expect. You'll grow it in Lesson 7. "
+                   "Notice the last reply came wrapped in ```json fences: `ask_json` finds the JSON inside, because models often do that."),
+            ("md", "**6. What does it cost?** About ¾ of a word per token in English, so tokens ≈ words ÷ 0.75. "
+                   "With a live model, `llm.usage` also shows the real counts the provider reported.\n\n"
+                   "🤔 *About how many tokens is the system prompt?*"),
+            ("code", 'words = len(SYSTEM.split())\nprint(words, "words ≈", round(words / 0.75), "tokens")\nprint("Reported so far:", llm.usage)\n\n'
+                     'PRICE_PER_MILLION = 2.00   # an example price in dollars. Check your model\'s real price.\n'
+                     'tokens_per_enquiry = 1500\nmonthly = 2500 * tokens_per_enquiry / 1_000_000 * PRICE_PER_MILLION\n'
+                     'print(f"2,500 enquiries a month ≈ ${monthly:.2f}")'),
+            ("md", "**7. Tools.** The model can't see today's calendar, but your code can. Try the two tools directly first."),
+            ("code", 'print(northstar.get_fee("mern course"))\nprint(northstar.find_slots("2026-11-21", "morning"))'),
+            ("md", "Now tell the model about the tools. When it needs one, it replies with a request; your code runs it and sends back the result. "
+                   "That loop is the whole idea behind tool use."),
+            ("code", 'import json\n\nAGENT = SYSTEM + """\n\nToday is Sunday 15 November 2026.\n'
+                     'You can use these tools. To use one, reply with JSON only: {"tool": "get_fee", "args": {"course": "Python & AI"}}\n'
+                     '- get_fee(course): the current fee and EMI for a course\n'
+                     '- find_slots(day, part): free counselling slots. day is YYYY-MM-DD. part is morning, afternoon, evening or any.\n'
+                     'When you have what you need, reply with JSON only: {"reply": "your message to the enquirer"}"""\n\n\n'
+                     'def run_agent(message, label, max_steps=5):\n    transcript = f"Enquirer: {message}"\n'
+                     '    for step in range(max_steps):\n        out = llm.ask_json(transcript, system=AGENT, label=f"{label}-{step}")\n'
+                     '        if "reply" in out:\n            print("Reply:", out["reply"])\n            return\n'
+                     '        name, args = out["tool"], out.get("args", {})\n        result = northstar.TOOLS[name](**args)\n'
+                     '        print(f"Step {step + 1}: {name}({args})\\n   → {result}")\n'
+                     '        transcript += f"\\nTool {name} returned: {json.dumps(result, ensure_ascii=False)}"\n'
+                     '    print("Stopped: too many steps.")'),
+            ("md", "🤔 *Which tool will each message need?*"),
+            ("code", 'run_agent("Any counselling slot on Saturday morning?", "l4-sat")'),
+            ("code", 'run_agent("fees for python course? EMI possible?", "l4-py")'),
+            ("code", 'run_agent("Python course fee, and can someone call me on Monday?", "l4-both")'),
+            ("md", "The last one used two tools, so it took 3 model calls: one per tool, plus one to write the reply."),
+            ("md", "**8. Same question, different answers.** Ask three times at low and at high temperature.\n\n"
+                   "🤔 *Which would you trust to quote a fee?*\n\n"
+                   "Some newer models, like Claude's current ones, don't offer a temperature setting. With them, both rows behave the same."),
+            ("code", 'for temperature, label in [(0.0, "l4-temp-low"), (1.0, "l4-temp-high")]:\n'
+                     '    print(f"Temperature {temperature}:")\n    for _ in range(3):\n'
+                     '        print("  ", llm.ask("fees for full stack? one line.", system=SYSTEM, temperature=temperature, label=label))'),
+            ("md", "**9. Your turn.** Add a third tool, `hand_to_human(reason)`, that returns `{\"handed_over\": True, \"reason\": reason}`. "
+                   "Add it to `northstar.TOOLS` and to the tool list in `AGENT`, then run "
+                   "`run_agent(\"I joined last month and want a refund\", \"mine\")` with a live model. Does it hand over?"),
+            ("code", '# Write your hand_to_human tool here\n'),
+            ("md", "**10. Put it on your GitHub.** Save a copy of this notebook (File → Save a copy in GitHub), "
+                   "or download it and add it to your portfolio repo. Next lesson, the agent answers from Northstar's course pages."),
         ],
     },
 }
