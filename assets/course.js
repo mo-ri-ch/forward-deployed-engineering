@@ -9,7 +9,7 @@ const COURSE_LESSONS = [
   { n: 2, step: "discovery", title: "Discovery", file: "lesson2.html", ready: true, test: 13,
     summary: "Turn a vague brief into one clear problem, with a number to prove it's solved.",
     leaves: "You've picked a problem. How do you work inside code you didn't write?" },
-  { n: 3, step: "their code", title: "Reading someone else's code", file: "lesson3.html", ready: true, test: 9,
+  { n: 3, step: "their code", title: "Reading someone else's code", file: "lesson3.html", ready: true, test: 10,
     summary: "Find your way around a client's codebase, and fix a bug without breaking anything.",
     leaves: "How do you get a language model to do the job reliably?" },
   { n: 4, step: "LLMs", title: "Building with LLMs", file: "lesson4.html", ready: true, test: 9,

@@ -20,6 +20,16 @@ AI system, then look after it once it's live.
 | 11. Capstone | Run your own engagement for your portfolio |
 | 12. Interview practice | Cases, system design, role-play and your project story |
 
+## Build it yourself
+
+Hands-on Colab notebooks build the Northstar admissions agent step by step, on real starter code and data:
+
+| Notebook | What you do |
+| --- | --- |
+| [Lesson 3](notebooks/lesson3.ipynb) | Fix the duplicate-lead bug in Kevin's code, with tests, and clean up the sheet |
+
+Starter code lives in [`starter/`](starter/). The notebooks are built from `tools/make_notebooks.py`.
+
 The client, Northstar Skills, is made up. Every name, number and message in the course is invented.
 
 Built with the shared [study notebook design](https://github.com/mo-ri-ch/study-notebook-design).
