@@ -186,3 +186,8 @@
 .cards .row3 { grid-template-columns: 1fr; gap: 6px; }
 .cards .cause { padding: 6px 12px; width: 100%; }
 .cards .cause .fix { font-family: var(--body); font-size: 0.92rem; color: var(--ink); line-height: 1.45; }
+
+/* A list of links with a note each */
+.files .btn { display: inline-block; margin-right: 8px; }
+.files li:has(.btn) { padding: 4px 0; }
+.files .muted-note { font-family: var(--body); }

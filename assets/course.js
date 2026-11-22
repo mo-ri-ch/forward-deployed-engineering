@@ -33,7 +33,7 @@ const COURSE_LESSONS = [
   { n: 10, step: "talking", title: "Talking to the client", file: "lesson10.html", ready: true, test: 8,
     summary: "Demos, short updates and handling pushback calmly.",
     leaves: "Can you run a whole engagement on your own?" },
-  { n: 11, step: "capstone", title: "Capstone", file: "lesson11.html", ready: true, test: 8,
+  { n: 11, step: "capstone", title: "Capstone", file: "lesson11.html", ready: true, test: 9,
     summary: "A full engagement from brief to demo, for your portfolio.",
     leaves: "How do you turn this into a job offer?" },
   { n: 12, step: "interviews", title: "Interview practice", file: "lesson12.html", ready: true, test: 9,

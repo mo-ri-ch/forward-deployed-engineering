@@ -36,6 +36,8 @@ Hands-on Colab notebooks build the Northstar admissions agent step by step, on r
 
 For interviews: ten [interview cases](https://gradlabs.in/learn/fde/lessons/cases.html) with what a strong answer covers, and [coding round practice](notebooks/coding-round.ipynb), eight timed exercises with checks ([model answers](notebooks/coding-round-solutions.ipynb)).
 
+To apply with it: [portfolio templates](portfolio/) for your README, demo video, write-up, resume and LinkedIn.
+
 Starter code lives in [`starter/`](starter/). The notebooks are built from `tools/make_notebooks.py`; the first-week log from `tools/make_live_week.py`.
 
 The client, Northstar Skills, is made up. Every name, number and message in the course is invented.
