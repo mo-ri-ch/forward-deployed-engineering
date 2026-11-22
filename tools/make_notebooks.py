@@ -5,6 +5,7 @@ Writes notebooks/lessonN.ipynb from the cells below. Edit the cells here, not th
 """
 import json
 import os
+import re
 
 COURSE = "https://gradlabs.in/learn/fde/lessons"
 REPO = "https://github.com/mo-ri-ch/forward-deployed-engineering"
@@ -828,6 +829,98 @@ print(update)"""),
 })
 
 
+SETUP_ROUND = f"""import os
+if not os.path.exists("/content/forward-deployed-engineering"):
+    !git clone -q --depth 1 {REPO} /content/forward-deployed-engineering
+%cd /content/forward-deployed-engineering/starter/coding-round
+from checks import *"""
+
+EXERCISES = [
+    ("1. Remove duplicate leads", "15 minutes",
+     "Kevin's lead sheet has the same person in several rows, with phone numbers written different ways. "
+     "Return one row per person (the same last 10 digits), with `phone` set to those 10 digits.\n\n"
+     "- Keep the row with the most advanced status: `new` < `interested` < `booked call` < `joined` (ignore case and `!`). Anything else counts as `new`.\n"
+     "- On a tie, keep the later date.\n- Sort the result by phone.",
+     "def dedupe_leads(rows):\n    # rows: a list of dicts with date, name, phone, status\n    ...", "check_1(dedupe_leads)",
+     "Clarify first: what counts as the same person? Which row wins? Say your rules out loud before you code."),
+    ("2. Parse WhatsApp messages", "10 minutes",
+     "WhatsApp sends nested JSON. Return a list of `{\"phone\", \"name\", \"text\"}`, one per message, across every entry and change.\n\n"
+     "- The name comes from `contacts`, matched by `wa_id` to the message's `from`. Missing: `\"\"`.\n"
+     "- A text message's text is `text.body`. A voice note (`type` `audio`) becomes `\"[voice note]\"`; any other type becomes `\"[type]\"`.\n"
+     "- Some payloads are status updates with no `messages` at all.",
+     "def parse_webhook(payload):\n    ...", "check_2(parse_webhook)",
+     "Real payloads are messy. Use .get() with defaults, so a missing key doesn't crash a live system."),
+    ("3. Read messy fees", "15 minutes",
+     "The two fee sheets write fees every way: `\"₹1,45,000\"`, `\"135000\"`, `\"1.35 L\"`, `\"₹1.4 lakh\"`, `\"1,10,000/-\"`, `\"Rs. 1,15,000\"`.\n\n"
+     "- `parse_fee(text)` returns the fee as a whole number of rupees.\n"
+     "- `find_conflicts(a, b)` takes two sheets (course name → fee text) and returns the courses whose fees differ, "
+     "with names compared ignoring case and spaces, as a sorted list of lowercase names.",
+     "def parse_fee(text):\n    ...\n\n\ndef find_conflicts(a, b):\n    ...", "check_3(parse_fee, find_conflicts)",
+     "1 lakh = 1,00,000. Watch out for the decimal point in \"1.35 L\"."),
+    ("4. Retry a flaky tool", "15 minutes",
+     "The calendar sometimes times out. Write `call_with_retry(fn, attempts=3, base_delay=1.0, sleep=time.sleep)`.\n\n"
+     "- Retry only on `TimeoutError` and `ConnectionError`. Any other error is raised straight away: retrying a bad request won't help.\n"
+     "- Wait `base_delay`, then twice that, then four times (this is called exponential backoff). Call `sleep(seconds)` to wait.\n"
+     "- After the last attempt, raise the last error.",
+     "import time\n\n\ndef call_with_retry(fn, attempts=3, base_delay=1.0, sleep=time.sleep):\n    ...", "check_4(call_with_retry)",
+     "Passing sleep in as an argument lets the test run instantly. That trick is called dependency injection."),
+    ("5. Find the next free slots", "10 minutes",
+     "Write `next_slots(slots, after, part=\"any\", weekdays_only=False, n=3)`. Return up to `n` free slots on or after the date `after`, "
+     "as `(date, time, counsellor)` tuples, sorted by date, then time, then counsellor.\n\n"
+     "- `part` is `morning` (before 12:00), `afternoon` (12:00 to 17:00), `evening` (from 17:00) or `any`.\n"
+     "- `weekdays_only` leaves out Saturdays and Sundays.\n- Run `slots = list(csv.DictReader(open(\"slots.csv\")))` to see the data.",
+     "import csv\nfrom datetime import date\n\n\ndef next_slots(slots, after, part=\"any\", weekdays_only=False, n=3):\n    ...", "check_5(next_slots)",
+     "Dates written YYYY-MM-DD sort correctly as text. date.fromisoformat(d).weekday() is 5 or 6 at weekends."),
+    ("6. Score an eval run", "15 minutes",
+     "Each case has `id`, `kind`, `must` (words the reply must contain), `must_not` and `human` (should it hand over?). "
+     "`results` maps each id to `{\"reply\", \"handover\"}`. Return:\n\n"
+     "`{\"pass_rate\": …, \"by_kind\": {kind: rate}, \"failures\": [ids], \"ready\": …}`\n\n"
+     "- Word checks ignore case.\n- `ready` is true only if the pass rate is at least 0.9 **and** every risky case passes.",
+     "def score_evals(cases, results):\n    ...", "check_6(score_evals)",
+     "Write the one-case check first, as its own small function, then build the totals from it."),
+    ("7. Hide personal data", "10 minutes",
+     "Write `mask(text, keep_last=0)`. Replace every Indian mobile number with `[PHONE]` and every email with `[EMAIL]`. "
+     "With `keep_last=4`, show a phone as `******` plus its last 4 digits instead, for staff.\n\n"
+     "Numbers come as `+91 99999 01234`, `9999901234`, `099999 01236`, `+91-99999-01234` and `919999901234`. "
+     "Don't touch other numbers, like a year or a fee.",
+     "import re\n\n\ndef mask(text, keep_last=0):\n    ...", "check_7(mask)",
+     "Test the tricky ones on their own first. (?<!\\d) and (?!\\d) stop a pattern matching inside a longer number."),
+    ("8. Find the bugs", "10 minutes",
+     "These two functions from the monitoring script are wrong. Run the check to see how, then fix them.\n\n"
+     "- `is_night` should be true from 21:00 to 07:59.\n- `median` should handle an even number of values, and return `None` for an empty list.",
+     "def is_night(hhmm):\n    return \"21:00\" <= hhmm <= \"08:00\"\n\n\ndef median(values):\n    values = sorted(values)\n    return values[len(values) // 2]",
+     "check_8(is_night, median)",
+     "Read the failing cases before changing anything. Can a time be after 21:00 and before 08:00 at once?"),
+]
+
+practice_cells = [
+    ("md", "Eight short exercises like the ones in FDE coding interviews: practical, on messy data, with Northstar's real formats.\n\n"
+           "**How to practise:** set a timer for each one. Say your plan out loud before you code, like you would to an interviewer. "
+           "Ask yourself what could be missing or messy. Then run the check: it tries tricky cases and tells you which fail.\n\n"
+           "Stuck? Each exercise has a hint. The model answers are in a separate notebook, so try first."),
+    ("md", "**Setup.** Gets the checks and the data."),
+    ("code", SETUP_ROUND),
+]
+solution_cells = [
+    ("md", "Model answers for the coding round practice. **Try each exercise yourself first.**\n\n"
+           "There's more than one good answer. What matters in an interview: clear rules, tidy code, and handling the messy cases."),
+    ("md", "**Setup.**"),
+    ("code", SETUP_ROUND + "\nimport inspect, solutions"),
+]
+for title, minutes, brief, stub, check, hint in EXERCISES:
+    practice_cells += [("md", f"## {title}\n*About {minutes}.*\n\n{brief}"), ("code", stub), ("code", check), ("md", f"💡 *Hint: {hint}*")]
+    names = re.findall(r"check_\d\((.*)\)", check)[0].split(", ")
+    solution_cells += [("md", f"## {title}"),
+                       ("code", "\n".join(f"print(inspect.getsource(solutions.{f}))" for f in names)),
+                       ("code", re.sub(r"\((.*)\)", lambda m: "(" + ", ".join("solutions." + x for x in m.group(1).split(", ")) + ")", check))]
+practice_cells += [("md", "## Done?\nCompare your answers with the model answers in the "
+                          f"[solutions notebook](https://colab.research.google.com/github/mo-ri-ch/forward-deployed-engineering/blob/main/notebooks/coding-round-solutions.ipynb). "
+                          "Then try them again in a week, faster, talking out loud the whole time.")]
+
+LESSONS["coding-round"] = {"title": "Coding round practice", "cells": practice_cells}
+LESSONS["coding-round-solutions"] = {"title": "Coding round practice: model answers", "cells": solution_cells}
+
+
 def cell(kind, text):
     lines = text.split("\n")
     source = [line + "\n" for line in lines[:-1]] + [lines[-1]]
@@ -837,9 +930,15 @@ def cell(kind, text):
 
 
 def build(n, lesson):
-    head = (f"# Lesson {n}: {lesson['title']}\n\n"
-            f"From [Forward Deployed Engineering]({COURSE}/lesson{n}.html). "
-            "The client, Northstar Skills, is made up: every name, number and message is invented.")
+    if isinstance(n, int):
+        head = (f"# Lesson {n}: {lesson['title']}\n\n"
+                f"From [Forward Deployed Engineering]({COURSE}/lesson{n}.html). ")
+        path = f"notebooks/lesson{n}.ipynb"
+    else:
+        head = (f"# {lesson['title']}\n\n"
+                f"From [Forward Deployed Engineering]({COURSE}/lesson12.html). ")
+        path = f"notebooks/{n}.ipynb"
+    head += "The client, Northstar Skills, is made up: every name, number and message is invented."
     cells = [cell("md", head)] + [cell(k, t) for k, t in lesson["cells"]]
     nb = {
         "cells": cells,
@@ -849,10 +948,10 @@ def build(n, lesson):
         "nbformat": 4, "nbformat_minor": 0,
     }
     os.makedirs("notebooks", exist_ok=True)
-    with open(f"notebooks/lesson{n}.ipynb", "w", encoding="utf-8") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(nb, f, indent=1, ensure_ascii=False)
         f.write("\n")
-    print(f"notebooks/lesson{n}.ipynb: {len(cells)} cells")
+    print(f"{path}: {len(cells)} cells")
 
 
 if __name__ == "__main__":

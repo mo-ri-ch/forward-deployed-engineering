@@ -36,7 +36,7 @@ const COURSE_LESSONS = [
   { n: 11, step: "capstone", title: "Capstone", file: "lesson11.html", ready: true, test: 8,
     summary: "A full engagement from brief to demo, for your portfolio.",
     leaves: "How do you turn this into a job offer?" },
-  { n: 12, step: "interviews", title: "Interview practice", file: "lesson12.html", ready: true, test: 8,
+  { n: 12, step: "interviews", title: "Interview practice", file: "lesson12.html", ready: true, test: 9,
     summary: "Mock case studies, system design and presenting your project.",
     leaves: null },
 ];
