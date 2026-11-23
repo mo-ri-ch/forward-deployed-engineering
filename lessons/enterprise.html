@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enterprise clients</title>
+<meta name="description" content="Enterprise clients: single sign-on, roles, keeping each client's data apart, security reviews and webhooks. An extra lesson from Forward Deployed Engineering.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&family=Kalam:wght@400&family=Patrick+Hand&display=swap" rel="stylesheet">
+<script>try{if(localStorage.getItem("notebook-theme")==="dark")document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<link rel="stylesheet" href="https://mo-ri-ch.github.io/study-notebook-design/v1/style.css">
+<link rel="stylesheet" href="../assets/fde.css">
+</head>
+<body data-pen="blue">
+<div class="wrap">
+  <header class="topbar">
+    <a class="home" href="../">← Forward Deployed Engineering</a>
+    <span class="where">Lesson 8 extra</span>
+  </header>
+
+  <main data-paged>
+    <div class="paged-head">
+      <h1>Enterprise clients</h1>
+      <div class="progress" aria-label="Lesson parts"></div>
+    </div>
+    <section class="part" data-title="A bigger client">
+      <h2>A bigger client</h2>
+      <p class="say">The Northstar agent works, so your company now offers it to other institutes. The first to sign is Meridian Learning, a chain of 40 centres with its own IT team.</p>
+      <p class="say">Northstar asked "does it answer well?". Big clients ask that, and then ask who can get in, where the data goes and how it connects to their systems. Clients like this are called <mark>enterprise</mark> clients.</p>
+
+      <div class="activity">
+        <div class="do">Step through Meridian's first call</div>
+        <ol class="day" id="asks">
+          <li><span class="t">sign-in</span><span>"Our staff won't remember another password. They sign in with their Meridian accounts."</span></li>
+          <li><span class="t">roles</span><span>"Counsellors see their own centre. Only managers can download leads."</span></li>
+          <li><span class="t">data</span><span>"Our leads must never mix with another client's."</span></li>
+          <li><span class="t">review</span><span>"Our security lead, Sanjay, needs answers in writing before we sign."</span></li>
+          <li><span class="t">systems</span><span>"Leads go into our CRM, not a spreadsheet."</span></li>
+        </ol>
+      </div>
+      <p class="hook">Start with signing in.</p>
+    </section>
+
+    <section class="part" data-title="Sign in with their accounts">
+      <h2>Sign in with their accounts</h2>
+      <p class="say">With <mark>SSO</mark> (single sign-on), staff sign in to your dashboard with the accounts they already use at work. Your app never stores their passwords. Meridian's login system tells it who they are.</p>
+      <p class="say">The big win is when someone leaves. IT switches off one account, and access ends everywhere at once.</p>
+
+      <div class="activity">
+        <div class="do">Priya leaves on Friday. IT switches off her Meridian account. Is she still in?</div>
+        <div id="sso"></div>
+        <div class="reply" id="ssoOut"></div>
+      </div>
+      <p class="hook">She's signed in. What may she do?</p>
+    </section>
+
+    <section class="part" data-title="Who can do what">
+      <h2>Who can do what</h2>
+      <p class="say">Give each person a <mark>role</mark>, and write down what each role may do. Meridian has two: counsellors and managers.</p>
+      <p class="say">Anything not written down is a no. That way a new feature is locked until you decide who gets it, not open by accident.</p>
+
+      <div class="activity">
+        <div class="do">Priya is a counsellor at Centre 4. Sort what she tries</div>
+        <div id="roles"></div>
+      </div>
+      <p class="hook">Now the rule Meridian cares about most.</p>
+    </section>
+
+    <section class="part" data-title="Keep each client's data apart">
+      <h2>Keep each client's data apart</h2>
+      <p class="say">Both clients' leads now sit in one database. Each client is called a <mark>tenant</mark>, and every row is labelled with its tenant.</p>
+      <p class="say">Every query must filter by the tenant of the person signed in. Take the tenant from their sign-in, never from the request, so nobody can see another client's data by changing a web address. Then test it: sign in as each client and search for the other's leads.</p>
+
+      <div class="activity">
+        <div class="do">Priya searches for "arun". Switch the filter on and off</div>
+        <div id="tenant"></div>
+        <div class="reply" id="tenantOut"></div>
+      </div>
+      <p class="hook">Practise the numbers.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice E.1">
+      <h2>✏️ Practice E.1</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        Without SSO, every system a leaver used needs its own account switched off. With SSO, there's one account.
+      </div>
+      <div class="activity" id="prac1">
+        <div class="prob" data-answer="280" data-hint="Counsellors: 40 × 6. Then add one manager per centre." data-work="40 × 6 = 240 counsellors.<br>240 + 40 managers = 280 accounts.">
+          <div class="ask">1. Meridian has 40 centres, each with 6 counsellors and 1 manager. How many people need to sign in?</div>
+        </div>
+        <div class="prob" data-answer="15" data-hint="Each leaver has 3 accounts to switch off." data-work="5 leavers × 3 systems = 15 accounts to switch off by hand.<br>With SSO: 5, one each.">
+          <div class="ask">2. Without SSO, staff have separate accounts on 3 systems. 5 people leave this month. How many accounts must IT switch off?</div>
+        </div>
+        <div class="prob" data-answer="86" data-hint="Northstar searches for every Meridian lead, and Meridian for every Northstar lead." data-work="Northstar searches for Meridian's 50 leads, and Meridian for Northstar's 36.<br>50 + 36 = 86 searches. Every one must come back empty.">
+          <div class="ask">3. To test separation, each client searches for every lead of the other. Northstar has 36 leads and Meridian 50. How many searches?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Pass the security review">
+      <h2>Pass the security review</h2>
+      <p class="say">Before a big client signs, their security team asks how you protect their data. This is a <mark>security review</mark>. Northstar wants one too now that the agent serves others, so Kevin runs it.</p>
+      <p class="say">Answer only what's true. "We don't do that yet; here's the plan" beats a guess they'll find out later. Logging every view and download, with who and when, is called an <mark>audit log</mark>.</p>
+
+      <div class="activity">
+        <div class="do">Answer Kevin's questions</div>
+        <div class="chat" id="review"></div>
+        <div class="say-why" id="reviewSay"></div>
+      </div>
+      <p class="hook">Last ask: their CRM.</p>
+    </section>
+
+    <section class="part" data-title="Connect to their systems">
+      <h2>Connect to their systems</h2>
+      <p class="say">Meridian's CRM has an API. Your code calls it to add each new lead. When a lead enrols, the CRM calls your web address to tell you. That call is a <mark>webhook</mark>.</p>
+      <p class="say">Anyone can call a web address, so each webhook carries a <mark>signature</mark> made with a secret only the CRM and you know. CRMs also retry, so the same event can arrive twice. Each event has an ID: if you've seen it, do nothing.</p>
+
+      <div class="activity">
+        <div class="do">Put the webhook steps in order</div>
+        <div id="hook"></div>
+      </div>
+      <p class="hook">Practise the numbers.</p>
+    </section>
+
+    <section class="part" data-nonum data-title="✏️ Practice E.2">
+      <h2>✏️ Practice E.2</h2>
+      <div class="remember">
+        <b>Remember:</b><br>
+        A repeated event ID changes nothing. A bad signature is refused.<br>
+        <b class="eqbox">time = calls ÷ calls allowed per second</b>
+      </div>
+      <div class="activity" id="prac2">
+        <div class="prob" data-answer="1" data-hint="All three have the same event ID." data-work="The first one updates the lead. The other two have an ID you've seen, so they change nothing: 1 update.">
+          <div class="ask">1. The CRM sends the same "enrolled" event 3 times. How many times does the lead get updated?</div>
+        </div>
+        <div class="prob" data-answer="4" data-hint="Work out 2% of 200." data-work="200 × 2 ÷ 100 = 4 webhooks refused.">
+          <div class="ask">2. You get 200 webhooks a day, and 2% fail the signature check. How many are refused each day?</div>
+        </div>
+        <div class="prob" data-answer="180" data-hint="Divide 1,800 by 10." data-work="1,800 ÷ 10 = 180 seconds, or 3 minutes.">
+          <div class="ask">3. You copy Meridian's 1,800 old leads into their CRM. Their API allows 10 calls a second. How many seconds does it take?</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Do it for real">
+      <h2>Do it for real</h2>
+      <p class="say">In the notebook, one store holds both clients' leads. You'll make a leak happen, write a test that catches it, and fix it.</p>
+      <p class="say">Then you'll write the role rules, check sign-in tokens, handle fake and repeated webhooks, and keep an audit log you can show Kevin.</p>
+
+      <div class="activity">
+        <div class="do">Make it enterprise-ready in Google Colab</div>
+        <p class="run-links">
+          <a class="btn primary" href="https://colab.research.google.com/github/mo-ri-ch/forward-deployed-engineering/blob/main/notebooks/enterprise.ipynb" target="_blank" rel="noopener">▶ Open the notebook in Colab</a>
+        </p>
+        <p class="muted-note">No API key needed. About 40 minutes.</p>
+      </div>
+      <p class="hook">Then check what stuck.</p>
+    </section>
+
+    <section class="part" data-title="Check yourself">
+      <h2>Check yourself</h2>
+      <p class="say">Four questions, all on new examples.</p>
+      <div class="quiz" data-right="Yes. One account to switch off, and access ends everywhere.">
+        <div class="q"><small>Question 1</small>A hospital's IT team asks for SSO on your booking dashboard. What's the main thing they get?</div>
+        <div class="options">
+          <button data-why="SSO is about who's signing in, not speed.">Faster pages</button>
+          <button data-right>When someone leaves, switching off their work account ends their access</button>
+          <button data-why="Staff still sign in; they just use their work account.">Nobody has to sign in</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="quiz" data-right="Yes. Take the tenant from the sign-in, so changing the request can't change it.">
+        <div class="q"><small>Question 2</small>Your app serves two banks. Where should it get the bank to filter by?</div>
+        <div class="options">
+          <button data-why="Anyone can change a web address.">From the web address, like ?bank=2</button>
+          <button data-right>From the signed-in user's account</button>
+          <button data-why="Then every user sees every bank.">Don't filter: one database is simpler</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="quiz" data-right="Yes. Without the secret, a fake can't make a matching signature.">
+        <div class="q"><small>Question 3</small>Someone sends your webhook address a fake "payment received" call. What stops it?</div>
+        <div class="options">
+          <button data-right>Checking the signature with the shared secret</button>
+          <button data-why="Web addresses get found. Assume anyone can call it.">Keeping the address hidden</button>
+          <button data-why="Fakes can copy the right format exactly.">Checking the message looks right</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+      <div class="quiz" data-right="Yes. Honest gaps with a plan build trust; a wrong &quot;yes&quot; breaks it.">
+        <div class="q"><small>Question 4</small>A security reviewer asks about something you haven't built yet. What do you say?</div>
+        <div class="options">
+          <button data-why="They will check, and then they won't trust any other answer.">"Yes, we do that"</button>
+          <button data-right>"Not yet. Here's how and when we'll add it."</button>
+          <button data-why="Skipping it leaves a gap they'll ask about again.">Leave it blank</button>
+        </div>
+        <div class="feedback"></div>
+      </div>
+    </section>
+
+    <section class="part" data-title="Back to Northstar">
+      <h2>Back to Northstar</h2>
+      <div class="open-question">
+        <div>This leaves a question</div>
+        <div class="big">It's live. What happens on day two?</div>
+        <div><a href="lesson9.html">Lesson 9 answers it.</a></div>
+      </div>
+      <p class="muted-note">In interviews, expect at least one of these: SSO, keeping tenants apart, or a security review. You now have an answer, and code, for each.</p>
+    </section>
+  </main>
+</div>
+
+<nav class="pagebar" aria-label="Move between parts">
+  <div class="inner">
+    <button data-page-back>← Previous</button>
+    <span data-page-label></span>
+    <button class="primary" data-page-next>Next →</button>
+  </div>
+</nav>
+
+<script src="../assets/course.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/common.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/pen.js"></script>
+<script src="https://mo-ri-ch.github.io/study-notebook-design/v1/guide.js"></script>
+<script src="../assets/fde.js"></script>
+<script>
+stepper("asks", { after: (i, n) => i === n - 1 ? "Five asks. None is about how well it answers, and all of them can stop a deal." : "" });
+
+toggles("sso", "ssoOut", {
+  keys: [
+    { id: "sso", label: "Dashboard uses SSO" },
+    { id: "off", label: "IT switches off her Meridian account" },
+  ],
+  render: s => {
+    const systems = ["Email", "Agent dashboard", "Lead downloads"];
+    const inNow = systems.map((x, i) => {
+      if (!s.off) return true;
+      if (i === 0) return false;                 // email is Meridian's own account
+      return !s.sso;                             // without SSO, your app has its own password for her
+    });
+    const still = inNow.filter(Boolean).length;
+    const rows = systems.map((x, i) => `${esc(x)}: ${inNow[i] ? '<span class="warn">still in</span>' : "locked out"}`).join("<br>");
+    let note = !s.off ? "She still works here. Now switch off her account."
+      : s.sso ? "Locked out of everything. IT didn't have to know your app exists."
+      : `Still in ${still} system${still > 1 ? "s" : ""}. Someone has to remember your app's own password for her.`;
+    return `<small>Priya's access</small>${rows}<br><small>${note}</small>`;
+  },
+});
+
+sorter("roles", {
+  bins: [{ id: "yes", label: "Allowed" }, { id: "no", label: "Not allowed" }],
+  items: [
+    { t: "Open a lead from Centre 4", bin: "yes", why: "Her own centre: that's her job." },
+    { t: "Add a note to her own lead", bin: "yes", why: "Counsellors update the leads they handle." },
+    { t: "Open a lead from Centre 9", bin: "no", why: "Another centre's leads aren't hers." },
+    { t: "Download all leads as a file", bin: "no", why: "Only managers can download." },
+    { t: "Open a Northstar lead", bin: "no", why: "Another client. Never, for anyone at Meridian." },
+    { t: "Use a new \"bulk delete\" button", bin: "no", why: "Not on the list yet, so it's a no until someone decides." },
+  ],
+  done: "Sorted. Her role allows two things; everything else is a no.",
+});
+
+toggles("tenant", "tenantOut", {
+  keys: [{ id: "f", label: "Filter by the signed-in client" }],
+  render: s => {
+    const rows = [["meridian", "M-201", "Arun Kumar", "Data Analytics"], ["northstar", "N-101", "Arun K", "Full Stack"]];
+    const shown = rows.filter(r => !s.f || r[0] === "meridian");
+    const lines = shown.map(r => `${r[1]} · ${esc(r[2])} · ${esc(r[3])}${r[0] !== "meridian" ? ' <span class="warn">Northstar\'s lead</span>' : ""}`).join("<br>");
+    return `<small>Priya sees</small>${lines}<br><small>${s.f ? "Only Meridian's lead. Northstar's Arun stays invisible." : "She can see a Northstar lead, phone number and all. One leak like this can end both contracts."}</small>`;
+  },
+});
+
+practice("prac1");
+
+chatPick("review", "reviewSay", {
+  who: "Kevin",
+  turns: [
+    { q: "Can Meridian ever see our leads?", a: [
+      ["No. Every query filters by the client of whoever's signed in, and a test tries every name across clients on every release.", null],
+      ["Very unlikely. They'd have to know where to look.", "Hoping nobody looks isn't protection. Say what stops it, and how you test it."],
+      ["Yes, but only managers.", "No one at another client should ever see Northstar's leads."],
+    ] },
+    { q: "What goes to the model company?", a: [
+      ["Everything, so the answers are better.", "Personal details don't help it answer. Send only what it needs."],
+      ["Only the message text, with phone numbers and emails hidden. On the paid plan, they don't train on it.", null],
+    ] },
+    { q: "Who looked at Fathima's lead last week?", a: [
+      ["We'd have to ask the counsellors.", "Memory isn't evidence. A log is."],
+      ["Every view and download is in the audit log with who and when. I'll send you the lines for her lead.", null],
+    ] },
+    { q: "Do you test for security holes every month?", a: [
+      ["Not yet. We'll book an outside security test before the Meridian launch and share the report.", null],
+      ["Yes, all the time.", "If it isn't true, he'll find out, and then he won't trust any answer."],
+    ] },
+  ],
+  endLine: "Clear answers. Put them in a document and I'll sign off.",
+  end: "Done. Each answer is either evidence or an honest plan.",
+});
+
+orderer("hook", {
+  steps: ["Receive the call", "Check the signature", "Check you haven't seen this event ID", "Update the lead", "Reply OK quickly"],
+  hints: [null, null, "check the signature first: a fake shouldn't even be looked up.", "first make sure it's real and new.", "do the work first."],
+  done: "In order: real, then new, then act, then reply.",
+});
+
+practice("prac2");
+</script>
+</body>
+</html>

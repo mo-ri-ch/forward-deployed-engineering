@@ -1,0 +1,17 @@
+client,lead_id,name,phone,course,centre,counsellor
+northstar,N-101,Arun K,9999901234,Full Stack,Tech Park,Anand
+northstar,N-102,Fathima R,9999901236,Python & AI,City,Divya
+northstar,N-103,Rohan M,9999901241,Mobile,Tech Park,Anand
+northstar,N-104,Kavya S,9999901244,Digital Marketing,City,Divya
+northstar,N-105,Nikhil P,9999901247,Full Stack,City,Divya
+northstar,N-106,Sneha J,9999901250,Graphic Design,Tech Park,Anand
+northstar,N-107,Adil H,9999901253,Video Editing,City,Divya
+northstar,N-108,Meera V,9999901256,Python & AI,Tech Park,Anand
+meridian,M-201,Arun Kumar,9999902201,Data Analytics,Centre 4,Priya
+meridian,M-202,Joel T,9999902202,Cloud,Centre 4,Priya
+meridian,M-203,Ananya B,9999902203,Data Analytics,Centre 9,Rahul
+meridian,M-204,Farhan Z,9999902204,Cyber Security,Centre 9,Rahul
+meridian,M-205,Kavya N,9999902205,Cloud,Centre 4,Priya
+meridian,M-206,Ishaan D,9999902206,Cyber Security,Centre 9,Rahul
+meridian,M-207,Riya C,9999902207,Data Analytics,Centre 4,Priya
+meridian,M-208,Sameer A,9999902208,Cloud,Centre 9,Rahul

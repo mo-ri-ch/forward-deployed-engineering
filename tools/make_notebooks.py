@@ -929,6 +929,92 @@ def cell(kind, text):
     return {"cell_type": "code", "metadata": {}, "execution_count": None, "outputs": [], "source": source}
 
 
+SETUP_ENT = f'''import os
+if not os.path.exists("/content/forward-deployed-engineering"):
+    !git clone -q --depth 1 {REPO} /content/forward-deployed-engineering
+%cd /content/forward-deployed-engineering/starter/enterprise'''
+
+LESSONS["enterprise"] = {
+    "title": "Enterprise clients",
+    "page": "enterprise.html",
+    "cells": [
+        ("md", "Your company's agent now runs for two clients: Northstar Skills and Meridian Learning, a bigger chain "
+               "with its own IT team. Both clients' leads sit in one store.\n\n"
+               "Make it safe for both: find a data leak and fix it, decide who may do what, check sign-in tokens, "
+               "handle webhooks that can be faked or sent twice, and keep a log Kevin can audit.\n\n"
+               "No API key needed. For each cell: **guess what it will print first**, then press ▶ and check."),
+        ("md", "**1. Get the code.**"),
+        ("code", SETUP_ENT),
+        ("md", "**2. Look at the store.** One table, two clients. Each counsellor works at one centre."),
+        ("code", 'import pandas as pd\n\nleads = pd.read_csv("data/leads.csv")\nprint(leads.groupby(["client", "centre"]).size())\nleads.head(10)'),
+        ("md", "**3. Make the leak happen.** Priya is a Meridian counsellor at Centre 4. She searches for \"arun\".\n\n"
+               "🤔 *How many results should she see? How many will she?*"),
+        ("code", 'from store import LeadStore\nfrom users import USERS\n\nstore = LeadStore()\nfor r in store.search(USERS["priya@meridian"], "arun"):\n    print(r["client"], r["lead_id"], r["name"], r["phone"])'),
+        ("md", "She sees Northstar's Arun, phone number and all. That one line is the whole risk: "
+               "a client seeing another client's data ends the contract, for both."),
+        ("md", "**4. Test for leaks before fixing them.** This check signs in as every user and searches for every name. "
+               "Write the test first, so you know when the fix works."),
+        ("code", 'from checks import check_isolation\n\ncheck_isolation(store.search)'),
+        ("md", "**5. Fix it.** Every query filters by the signed-in user's client. Counsellors also only see their own centre.\n\n"
+               "The client comes from the sign-in, never from the request, so nobody can ask for another client's data by changing a URL."),
+        ("code", 'def search(user, text):\n    rows = [r for r in store.rows if r["client"] == user["client"]]          # this client only\n'
+                 '    if user["role"] == "counsellor":\n        rows = [r for r in rows if r["centre"] == user["centre"]]        # and her own centre\n'
+                 '    return [r for r in rows if text.lower() in r["name"].lower()]\n\ncheck_isolation(search)'),
+        ("md", "🧪 *Try it:* delete the client line and run again. The check should catch it."),
+        ("md", "**6. Who may do what.** Write the rules as a short table, then one function that only says yes when a rule allows it. "
+               "Anything not on the list is a no."),
+        ("code", 'RULES = {\n    "counsellor": {"view"},\n    "manager": {"view", "export"},\n}\n\n'
+                 'def can(user, action, lead):\n    if lead["client"] != user["client"]:\n        return False\n'
+                 '    if action not in RULES.get(user["role"], set()):\n        return False\n'
+                 '    if user["role"] == "counsellor" and lead["centre"] != user["centre"]:\n        return False\n    return True\n\n'
+                 'from checks import check_can\ncheck_can(can)'),
+        ("md", "**7. Check who's signing in.** With SSO, Meridian's login system sends your app a signed note: who this is and until when. "
+               "Your app checks the signature with the shared key before trusting the note.\n\n"
+               "This is a simplified version. Real SSO uses public keys and a library such as `authlib`, but the checks are the same."),
+        ("code", 'import hashlib, hmac, time\nfrom tokens import make_token, read_token, MERIDIAN_LOGIN_KEY, _b64\n\n'
+                 'def sign_in(token):\n    body, sig, claims = read_token(token)\n'
+                 '    good = _b64(hmac.new(MERIDIAN_LOGIN_KEY, body.encode(), hashlib.sha256).digest())\n'
+                 '    if not hmac.compare_digest(sig, good):\n        return "rejected: signature doesn\'t match"\n'
+                 '    if claims["expires"] < time.time():\n        return "rejected: expired"\n'
+                 '    if claims["email"] not in USERS:\n        return "rejected: not a user here"\n'
+                 '    return "signed in as " + claims["email"]\n\n'
+                 'now = time.time()\nreal = make_token({"email": "priya@meridian", "expires": now + 3600})\n'
+                 'old = make_token({"email": "priya@meridian", "expires": now - 60})\n'
+                 'fake = make_token({"email": "sanjay@meridian", "expires": now + 3600}, key=b"a-guessed-key")\n\n'
+                 'for name, t in [("real", real), ("expired", old), ("forged", fake)]:\n    print(f"{name:8}", sign_in(t))'),
+        ("md", "🤔 *Divya leaves Northstar. IT disables her account. Why does her access end everywhere at once?* "
+               "Her next sign-in fails at Northstar's login system, and her token expires within the hour. No one has to remember your app."),
+        ("md", "**8. Webhooks.** Meridian's CRM calls your web address when a lead changes. Two things go wrong in real life: "
+               "someone sends a fake call, and the CRM sends the same event twice when it retries.\n\n"
+               "🤔 *There are 6 calls below. How many should change a lead?*"),
+        ("code", 'import json\nimport webhooks\n\ncalls = webhooks.load()\nfor c in calls:\n    e = json.loads(c["body"])\n    print(e["event_id"], e["type"], e["lead_id"])'),
+        ("code", 'seen = set()\nstatus = {}\n\ndef handle(call):\n    good = "sha256=" + hmac.new(webhooks.WEBHOOK_SECRET, call["body"].encode(), hashlib.sha256).hexdigest()\n'
+                 '    if not hmac.compare_digest(call["headers"]["X-Meridian-Signature"], good):\n        return 401, "rejected: bad signature"\n'
+                 '    event = json.loads(call["body"])\n    if event["event_id"] in seen:\n        return 200, "already done"       # say OK, so the CRM stops retrying\n'
+                 '    seen.add(event["event_id"])\n    status[event["lead_id"]] = event["type"]\n    return 200, "updated " + event["lead_id"]\n\n'
+                 'for c in calls:\n    print(*handle(c))\nprint()\nprint(status)'),
+        ("md", "Four leads changed. The fake \"enrolled\" for M-204 was refused, and the repeat of ev_9002 did nothing. "
+               "Handling the same event twice safely is called being **idempotent**.\n\n"
+               "🧪 *Try it:* run the loop again. Does anything change?"),
+        ("md", "**9. Keep an audit log.** Kevin's review asks: *can you show who looked at a lead?* "
+               "Write a line every time someone views or exports, and never edit old lines."),
+        ("code", 'from datetime import datetime\naudit = []\n\ndef view(uid, lead_id):\n    user = USERS[uid]\n    lead = next(r for r in store.rows if r["lead_id"] == lead_id)\n'
+                 '    allowed = can(user, "view", lead)\n    audit.append({"time": datetime.now().strftime("%H:%M:%S"), "who": uid, "action": "view",\n'
+                 '                  "lead": lead_id, "allowed": allowed})\n    return lead if allowed else None\n\n'
+                 'view("divya@northstar", "N-102")\nview("anand@northstar", "N-102")   # another centre: refused, and logged\n'
+                 'view("kevin@northstar", "N-102")\nview("sanjay@meridian", "N-102")   # another client: refused, and logged\n\n'
+                 'pd.DataFrame([a for a in audit if a["lead"] == "N-102"])'),
+        ("md", "**10. Answer Kevin's review with evidence.** Each answer points to something you ran, not a promise."),
+        ("code", 'print("Can another client see our leads?   No.", "Leak test:", "passed" if check_isolation(search) else "FAILED")\n'
+                 'print("Can counsellors export?              No. Rules:", RULES)\n'
+                 'print("Are fake webhooks refused?           Yes.", sum(handle(c)[0] == 401 for c in calls), "of", len(calls), "refused in the test")\n'
+                 'print("Who looked at lead N-102?           ", ", ".join(a["who"] for a in audit if a["lead"] == "N-102"))'),
+        ("md", "**What you've built:** data that stays with its client, rules that say no by default, checked sign-ins, "
+               "safe webhooks and an audit log. These are the questions every large client asks before signing.\n\n"
+               f"Back to the course: [Enterprise clients]({COURSE}/enterprise.html)."),
+    ],
+}
+
 def build(n, lesson):
     if isinstance(n, int):
         head = (f"# Lesson {n}: {lesson['title']}\n\n"
@@ -936,7 +1022,7 @@ def build(n, lesson):
         path = f"notebooks/lesson{n}.ipynb"
     else:
         head = (f"# {lesson['title']}\n\n"
-                f"From [Forward Deployed Engineering]({COURSE}/lesson12.html). ")
+                f"From [Forward Deployed Engineering]({COURSE}/{lesson.get('page', 'lesson12.html')}). ")
         path = f"notebooks/{n}.ipynb"
     head += "The client, Northstar Skills, is made up: every name, number and message is invented."
     cells = [cell("md", head)] + [cell(k, t) for k, t in lesson["cells"]]
